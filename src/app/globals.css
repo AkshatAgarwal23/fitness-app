@@ -1,0 +1,80 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-bg: #0A0B0F;
+  --color-surface: #13151C;
+  --color-border: #252730;
+  --color-text: #EEEDF0;
+  --color-text-secondary: #7B7D8E;
+  --color-text-muted: #4A4C5A;
+  --color-accent: #1D9E75;
+  --color-error: #E24B4A;
+  --font-sans: var(--font-inter);
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes drift1 {
+  0%   { transform: translate(0px, 0px) scale(1); }
+  25%  { transform: translate(40px, -60px) scale(1.08); }
+  50%  { transform: translate(-30px, -90px) scale(0.95); }
+  75%  { transform: translate(-60px, -30px) scale(1.04); }
+  100% { transform: translate(0px, 0px) scale(1); }
+}
+
+@keyframes drift2 {
+  0%   { transform: translate(0px, 0px) scale(1); }
+  30%  { transform: translate(-50px, 40px) scale(1.06); }
+  60%  { transform: translate(40px, 70px) scale(0.93); }
+  85%  { transform: translate(60px, 20px) scale(1.03); }
+  100% { transform: translate(0px, 0px) scale(1); }
+}
+
+@keyframes drift3 {
+  0%   { transform: translate(0px, 0px) scale(1); }
+  20%  { transform: translate(60px, 30px) scale(0.9); }
+  55%  { transform: translate(-40px, 60px) scale(1.1); }
+  80%  { transform: translate(20px, -40px) scale(0.97); }
+  100% { transform: translate(0px, 0px) scale(1); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { opacity: 0.6; }
+  50%       { opacity: 1; }
+}
+
+@keyframes scrollLeft {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+* { box-sizing: border-box; }
+
+body {
+  background-color: #0A0B0F;
+  color: #EEEDF0;
+  font-family: var(--font-inter), Inter, sans-serif;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+}
+
+/* Film grain overlay — adds texture to the dark background */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.055;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 300px 300px;
+}
+
+.fade-up {
+  animation: fadeUp 0.65s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
