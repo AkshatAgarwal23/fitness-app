@@ -48,7 +48,7 @@ export default function PixelFigure({ bmi }: { bmi: number | null }) {
           </filter>
         </defs>
 
-        <g fill="rgba(29,158,117,0.88)" filter="url(#figGlow)">
+        <g fill="rgba(var(--accent-rgb),0.88)" filter="url(#figGlow)">
           {/* Head */}
           <rect x={CX - 12} y={0}  width={24} height={20} />
           {/* Neck */}

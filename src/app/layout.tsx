@@ -21,8 +21,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${inter.variable} h-full`}>
+    <html lang="en" className={`${inter.variable} h-full`} suppressHydrationWarning>
       <body className="min-h-full relative">
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `try{var t=localStorage.getItem('forma-theme');if(t==='light')document.documentElement.setAttribute('data-theme',t)}catch(e){}`,
+          }}
+        />
         <AnimatedBackground />
         <div style={{ position: 'relative', zIndex: 1 }}>
           <PageTransition>{children}</PageTransition>

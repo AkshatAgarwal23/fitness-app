@@ -7,6 +7,12 @@ const cookieParser = require('cookie-parser');
 
 const authRoutes = require('./routes/auth');
 const profileRoutes = require('./routes/profile');
+const dashboardRoutes = require('./routes/dashboard');
+const sessionsRoutes = require('./routes/sessions');
+const weightRoutes = require('./routes/weight');
+const historyRoutes = require('./routes/history');
+const achievementsRoutes = require('./routes/achievements');
+const statsRoutes = require('./routes/stats');
 
 const app = express();
 
@@ -21,6 +27,13 @@ app.use(cookieParser());
 
 app.use('/api/auth', authRoutes);
 app.use('/api/profile', profileRoutes);
+app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/session', sessionsRoutes);
+app.use('/api/sessions', sessionsRoutes);
+app.use('/api/weight', weightRoutes);
+app.use('/api/sessions', historyRoutes);
+app.use('/api/achievements', achievementsRoutes);
+app.use('/api/stats', statsRoutes);
 
 mongoose
   .connect(process.env.MONGODB_URI)

@@ -20,13 +20,13 @@ export default function BMIBadge({ bmi }: BMIBadgeProps) {
       className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-[13px] font-medium"
       style={{
         background: 'rgba(29, 158, 117, 0.12)',
-        color: '#1D9E75',
+        color: 'var(--accent)',
         border: '1px solid rgba(29, 158, 117, 0.25)',
       }}
     >
       <span
         className="w-1.5 h-1.5 rounded-full"
-        style={{ background: '#1D9E75', boxShadow: '0 0 6px rgba(29,158,117,0.8)' }}
+        style={{ background: 'var(--accent)', boxShadow: '0 0 6px rgba(var(--accent-rgb),0.8)' }}
       />
       BMI {rounded} · {category}
     </span>

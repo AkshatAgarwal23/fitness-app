@@ -58,24 +58,24 @@ export default function LoginPage() {
     <main className="min-h-screen flex items-center justify-center px-6 py-12 relative overflow-hidden">
       <div
         className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] pointer-events-none"
-        style={{ background: 'radial-gradient(ellipse, rgba(29,158,117,0.15) 0%, transparent 70%)' }}
+        style={{ background: 'radial-gradient(ellipse, rgba(var(--accent-rgb),0.15) 0%, transparent 70%)' }}
       />
 
       <div
         className="relative w-full max-w-[420px] rounded-[16px] p-8 flex flex-col gap-7"
         style={{
-          background: 'rgba(13,15,22,0.75)',
+          background: 'rgba(var(--surface-rgb),0.75)',
           backdropFilter: 'blur(24px)',
           WebkitBackdropFilter: 'blur(24px)',
-          border: '1px solid rgba(255,255,255,0.07)',
-          boxShadow: '0 8px 48px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.05)',
+          border: '1px solid rgba(var(--fg-rgb),0.07)',
+          boxShadow: '0 8px 48px rgba(0,0,0,0.6), inset 0 1px 0 rgba(var(--fg-rgb),0.05)',
         }}
       >
         <div className="flex flex-col items-center gap-2 text-center">
-          <span className="text-[22px] font-medium tracking-[-0.02em]" style={{ color: '#EEEDF0' }}>
+          <span className="text-[22px] font-medium tracking-[-0.02em]" style={{ color: 'var(--text)' }}>
             Forma
           </span>
-          <p className="text-[14px]" style={{ color: '#7B7D8E' }}>
+          <p className="text-[14px]" style={{ color: 'var(--text-secondary)' }}>
             Welcome back
           </p>
         </div>
@@ -109,11 +109,11 @@ export default function LoginPage() {
           </Button>
         </form>
 
-        <div className="h-px w-full" style={{ background: '#252730' }} />
+        <div className="h-px w-full" style={{ background: 'var(--border)' }} />
 
-        <p className="text-[13px] text-center" style={{ color: '#7B7D8E' }}>
+        <p className="text-[13px] text-center" style={{ color: 'var(--text-secondary)' }}>
           Don&apos;t have an account?{' '}
-          <Link href="/signup" className="text-[#1D9E75] hover:text-[#22b584] transition-colors">
+          <Link href="/signup" className="text-[var(--accent)] hover:text-[var(--accent-2)] transition-colors">
             Sign up
           </Link>
         </p>

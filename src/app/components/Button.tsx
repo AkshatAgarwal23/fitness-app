@@ -24,16 +24,16 @@ export default function Button({
 
   const variants: Record<Variant, string> = {
     accent:
-      'bg-[#1D9E75] text-white hover:bg-[#22b584]',
+      'bg-[var(--accent)] text-white hover:bg-[var(--accent-2)]',
     primary:
-      'bg-[#1C1E28] text-[#EEEDF0] border border-[#252730] hover:border-[#3a3c4a] hover:bg-[#22253A]',
+      'bg-[var(--surface-2)] text-[var(--text)] border border-[var(--border)] hover:border-[#3a3c4a] hover:bg-[#22253A]',
     ghost:
-      'text-[#7B7D8E] hover:text-[#EEEDF0] hover:bg-[#1C1E28]',
+      'text-[var(--text-secondary)] hover:text-[var(--text)] hover:bg-[var(--surface-2)]',
   };
 
   const accentGlow =
     variant === 'accent'
-      ? 'shadow-[0_0_24px_rgba(29,158,117,0.35)]'
+      ? 'shadow-[0_0_24px_rgba(var(--accent-rgb),0.35)]'
       : '';
 
   return (

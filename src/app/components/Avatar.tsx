@@ -19,7 +19,7 @@ export default function Avatar({ name, size = 64 }: AvatarProps) {
         height: size,
         fontSize: size * 0.32,
         background: 'rgba(29, 158, 117, 0.12)',
-        color: '#1D9E75',
+        color: 'var(--accent)',
         border: '1px solid rgba(29, 158, 117, 0.25)',
         boxShadow: '0 0 20px rgba(29, 158, 117, 0.1)',
       }}

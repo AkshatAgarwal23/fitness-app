@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Input from '../components/Input';
 import Button from '../components/Button';
 import BMIBadge from '../components/BMIBadge';
+import Navbar from '../components/Navbar';
 
 function calcBMI(height: string, heightUnit: 'cm' | 'ft', weight: string): number | null {
   const h = parseFloat(height);
@@ -82,33 +83,35 @@ export default function ProfileSetupPage() {
   if (authChecking) {
     return (
       <main className="min-h-screen flex items-center justify-center">
-        <p className="text-[14px]" style={{ color: '#4A4C5A' }}>Loading…</p>
+        <p className="text-[14px]" style={{ color: 'var(--text-muted)' }}>Loading…</p>
       </main>
     );
   }
 
   return (
-    <main className="min-h-screen flex items-center justify-center px-6 py-12 relative overflow-hidden">
+    <div className="min-h-screen flex flex-col">
+    <Navbar userName={name} />
+    <main className="flex-1 flex items-center justify-center px-6 py-12 relative overflow-hidden">
       <div
         className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[500px] pointer-events-none"
-        style={{ background: 'radial-gradient(ellipse, rgba(29,158,117,0.15) 0%, transparent 70%)' }}
+        style={{ background: 'radial-gradient(ellipse, rgba(var(--accent-rgb),0.15) 0%, transparent 70%)' }}
       />
 
       <div
         className="relative w-full max-w-[500px] rounded-[16px] p-8 flex flex-col gap-7"
         style={{
-          background: 'rgba(13,15,22,0.75)',
+          background: 'rgba(var(--surface-rgb),0.75)',
           backdropFilter: 'blur(24px)',
           WebkitBackdropFilter: 'blur(24px)',
-          border: '1px solid rgba(255,255,255,0.07)',
-          boxShadow: '0 8px 48px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.05)',
+          border: '1px solid rgba(var(--fg-rgb),0.07)',
+          boxShadow: '0 8px 48px rgba(0,0,0,0.6), inset 0 1px 0 rgba(var(--fg-rgb),0.05)',
         }}
       >
         <div>
-          <h2 className="text-[20px] font-medium tracking-[-0.02em]" style={{ color: '#EEEDF0' }}>
+          <h2 className="text-[20px] font-medium tracking-[-0.02em]" style={{ color: 'var(--text)' }}>
             Set up your profile
           </h2>
-          <p className="text-[13px] mt-1" style={{ color: '#7B7D8E' }}>
+          <p className="text-[13px] mt-1" style={{ color: 'var(--text-secondary)' }}>
             Tell us about yourself so we can personalise your experience
           </p>
         </div>
@@ -121,7 +124,7 @@ export default function ProfileSetupPage() {
           {/* Height with toggle */}
           <div className="flex flex-col gap-1.5">
             <div className="flex items-center justify-between">
-              <label className="text-[12px] font-medium tracking-wide uppercase" style={{ color: '#7B7D8E' }}>
+              <label className="text-[12px] font-medium tracking-wide uppercase" style={{ color: 'var(--text-secondary)' }}>
                 Height
               </label>
               <div className="flex gap-1">
@@ -133,8 +136,8 @@ export default function ProfileSetupPage() {
                     className="px-3 py-1 rounded-full text-[12px] font-medium transition-all cursor-pointer"
                     style={
                       heightUnit === unit
-                        ? { background: '#1D9E75', color: '#fff' }
-                        : { background: '#1C1E28', color: '#7B7D8E', border: '1px solid #252730' }
+                        ? { background: 'var(--accent)', color: '#fff' }
+                        : { background: 'var(--surface-2)', color: 'var(--text-secondary)', border: '1px solid var(--border)' }
                     }
                   >
                     {unit}
@@ -151,9 +154,9 @@ export default function ProfileSetupPage() {
               min="0"
               className="w-full px-4 py-3 rounded-[10px] text-[14px] outline-none border transition-all"
               style={{
-                background: '#1C1E28',
-                color: '#EEEDF0',
-                borderColor: '#252730',
+                background: 'var(--surface-2)',
+                color: 'var(--text)',
+                borderColor: 'var(--border)',
               }}
             />
           </div>
@@ -163,7 +166,7 @@ export default function ProfileSetupPage() {
           {/* Live BMI */}
           {bmi !== null && (
             <div className="flex flex-col gap-2">
-              <p className="text-[12px] uppercase tracking-wide" style={{ color: '#4A4C5A' }}>Your BMI</p>
+              <p className="text-[12px] uppercase tracking-wide" style={{ color: 'var(--text-muted)' }}>Your BMI</p>
               <BMIBadge bmi={bmi} />
             </div>
           )}
@@ -176,6 +179,7 @@ export default function ProfileSetupPage() {
         </form>
       </div>
     </main>
+    </div>
   );
 }
 

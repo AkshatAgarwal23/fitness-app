@@ -12,6 +12,75 @@
   --font-sans: var(--font-inter);
 }
 
+/* ── Theme palettes ──
+   Default (no attribute) = Forma green.
+   data-theme="dark"  = black & grey.
+   data-theme="light" = beige & white. */
+:root {
+  --bg: #0A0B0F;
+  --bg-rgb: 10, 11, 15;
+  --surface: #13151C;
+  --surface-rgb: 13, 15, 22;
+  --surface-2: #1C1E28;
+  --border: #252730;
+  --text: #EEEDF0;
+  --text-secondary: #7B7D8E;
+  --text-muted: #4A4C5A;
+  --fg-rgb: 255, 255, 255;          /* overlays: white on dark themes */
+  --accent: #1D9E75;                /* brand green — same in every theme */
+  --accent-rgb: 29, 158, 117;
+  --accent-2: #22b584;
+  --accent-3: #9FE1CB;
+  --accent-deep: #0F6E56;
+  --accent-deep-rgb: 15, 110, 86;
+  --bar: #1D9E75;                   /* streak / intensity bars */
+  --bar-rgb: 29, 158, 117;
+  --aurora-green-rgb: 29, 158, 117; /* aurora main band */
+  --aurora-green2-rgb: 15, 110, 86;
+  --aurora-blue-rgb: 20, 80, 180;
+  --aurora-blue2-rgb: 10, 50, 140;
+  --aurora-cyan-rgb: 10, 100, 120;
+  --aurora-cyan2-rgb: 15, 60, 100;
+  --card-bg: rgba(13, 15, 22, 0.8);
+  --card-border: rgba(255, 255, 255, 0.08);
+  --workout-bg: rgba(29, 158, 117, 0.1);
+  --workout-border: rgba(29, 158, 117, 0.2);
+}
+
+/* Light mode — beige & white, warm and soft */
+[data-theme='light'] {
+  --bg: #F1EFE8;
+  --bg-rgb: 241, 239, 232;
+  --surface: #FAF8F2;
+  --surface-rgb: 250, 248, 242;     /* cards read as soft beige, not white-green */
+  --surface-2: #EAE7DD;
+  --border: #D8D5CA;
+  --text: #3A3833;
+  --text-secondary: #6E6B63;
+  --text-muted: #9B9788;
+  --fg-rgb: 58, 54, 46;             /* overlays: warm dark on light theme */
+  --accent: #B96A4B;                /* terracotta replaces green in light mode */
+  --accent-rgb: 185, 106, 75;
+  --accent-2: #C97D5C;
+  --accent-3: #8A4A32;
+  --accent-deep: #8A4A32;
+  --accent-deep-rgb: 138, 74, 50;
+  --bar: #B4795A;                   /* bars match the terracotta family */
+  --bar-rgb: 180, 121, 90;
+  --aurora-green-rgb: 196, 126, 94;  /* aurora becomes terracotta washes */
+  --aurora-green2-rgb: 172, 108, 80;
+  --aurora-blue-rgb: 204, 142, 108;
+  --aurora-blue2-rgb: 182, 122, 94;
+  --aurora-cyan-rgb: 210, 152, 118;
+  --aurora-cyan2-rgb: 178, 116, 88;
+  /* Boxless light mode — content floats on the canvas as soft frost,
+     structure comes from the immersive background instead of borders */
+  --card-bg: rgba(250, 246, 238, 0.62);
+  --card-border: transparent;
+  --workout-bg: rgba(250, 246, 238, 0.62);
+  --workout-border: transparent;
+}
+
 @keyframes fadeUp {
   from { opacity: 0; transform: translateY(24px); }
   to   { opacity: 1; transform: translateY(0); }
@@ -51,11 +120,66 @@
   to   { transform: translateX(-50%); }
 }
 
+@keyframes ringBreath {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.35; transform: scale(1.05); }
+}
+
+@keyframes arrowBounce {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(5px); }
+}
+
+@keyframes aurora1 {
+  0%   { transform: translate(0%, 0%)   rotate(-5deg)  scale(1);    }
+  33%  { transform: translate(4%, -10%) rotate(6deg)   scale(1.06); }
+  66%  { transform: translate(-6%, -5%) rotate(-9deg)  scale(0.95); }
+  100% { transform: translate(0%, 0%)   rotate(-5deg)  scale(1);    }
+}
+@keyframes aurora2 {
+  0%   { transform: translate(0%, 0%)    rotate(10deg)  scale(1);    }
+  40%  { transform: translate(-7%, -11%) rotate(-4deg)  scale(1.08); }
+  80%  { transform: translate(6%, -4%)   rotate(14deg)  scale(0.93); }
+  100% { transform: translate(0%, 0%)    rotate(10deg)  scale(1);    }
+}
+@keyframes aurora3 {
+  0%   { transform: translate(0%, 0%)   rotate(-12deg) scale(1);    }
+  50%  { transform: translate(8%, -7%)  rotate(9deg)   scale(1.1);  }
+  100% { transform: translate(0%, 0%)   rotate(-12deg) scale(1);    }
+}
+@keyframes aurora4 {
+  0%   { transform: translate(0%, 0%)    rotate(5deg)   scale(1);    }
+  45%  { transform: translate(-5%, -8%)  rotate(-10deg) scale(1.07); }
+  100% { transform: translate(0%, 0%)    rotate(5deg)   scale(1);    }
+}
+
+@keyframes starDrift {
+  from { transform: translateY(0); }
+  to   { transform: translateY(-110vh); }
+}
+
+/* Profile icon straightens his outfit — a little tilt-and-adjust shuffle */
+@keyframes gentleman {
+  0%   { transform: rotate(0deg); animation-timing-function: ease-in-out; }
+  22%  { transform: rotate(-16deg) translateY(-2px); animation-timing-function: ease-in-out; }
+  48%  { transform: rotate(13deg); animation-timing-function: ease-in-out; }
+  70%  { transform: rotate(-7deg); animation-timing-function: ease-in-out; }
+  86%  { transform: rotate(3deg) scale(1.12); animation-timing-function: ease-out; }
+  100% { transform: rotate(0deg) scale(1); }
+}
+
+@keyframes starTwinkle {
+  0%, 100% { opacity: 0.15; }
+  50%       { opacity: 0.7; }
+}
+
+
 * { box-sizing: border-box; }
 
 body {
-  background-color: #0A0B0F;
-  color: #EEEDF0;
+  background-color: var(--bg);
+  color: var(--text);
+  transition: background-color 0.3s ease, color 0.3s ease;
   font-family: var(--font-inter), Inter, sans-serif;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
@@ -73,6 +197,31 @@ body::after {
   mix-blend-mode: overlay;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)'/%3E%3C/svg%3E");
   background-size: 300px 300px;
+}
+
+[data-theme='light'] body::after {
+  opacity: 0.03; /* grain is subtler on the light background */
+}
+
+/* Sunrise horizon — a soft sun low on the screen, warm bands rising
+   from the horizon, cream sky above. Fixed so it stays put on scroll. */
+[data-theme='light'] body {
+  background:
+    /* sun core — small soft disc sitting just above the horizon */
+    radial-gradient(circle at 50% 76%, rgba(242, 176, 106, 0.85) 0%, rgba(242, 176, 106, 0.7) 4.5%, rgba(242, 176, 106, 0) 6%),
+    /* sun halo — wide warm glow around the disc */
+    radial-gradient(circle at 50% 76%, rgba(236, 158, 96, 0.4) 0%, rgba(230, 146, 96, 0.22) 14%, rgba(222, 134, 98, 0.1) 30%, transparent 48%),
+    /* horizon bands — warmth rising from the bottom */
+    linear-gradient(to top,
+      rgba(196, 126, 94, 0.32) 0%,
+      rgba(212, 148, 108, 0.22) 10%,
+      rgba(226, 172, 126, 0.14) 22%,
+      rgba(238, 198, 152, 0.08) 34%,
+      transparent 52%),
+    /* cream sky pouring down from the top */
+    linear-gradient(to bottom, #FBF8EF 0%, rgba(251, 248, 239, 0) 45%),
+    #F1EFE8;
+  background-attachment: fixed;
 }
 
 .fade-up {

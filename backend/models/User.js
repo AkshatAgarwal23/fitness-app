@@ -11,6 +11,9 @@ const userSchema = new mongoose.Schema(
     heightUnit: { type: String, enum: ['cm', 'ft'], default: 'cm' },
     weight: { type: Number },
     bmi: { type: Number },
+    weeklyGoal: { type: Number, default: 3 },
+    weightUnit: { type: String, enum: ['kg', 'lbs'], default: 'kg' },
+    theme: { type: String, enum: ['forma', 'light'], default: 'forma' },
   },
   { timestamps: true }
 );
