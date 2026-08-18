@@ -102,6 +102,7 @@ export default function LandingPage() {
         {/* Star field — slow upward drift + twinkle */}
         {STARS.map((s, i) => (
           <div
+          
             key={i}
             style={{
               position: 'absolute',
