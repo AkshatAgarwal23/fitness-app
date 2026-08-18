@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { X, LayoutDashboard, Home, User, Settings, DoorOpen, DoorClosed, ClipboardList, Trophy } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
@@ -13,26 +13,39 @@ interface SidePanelProps {
 }
 
 function PanelLink({
-  href, label, onClose, renderIcon,
+  href, label, onClose, renderIcon, active,
 }: {
   href: string;
   label: string;
   onClose: () => void;
   renderIcon: (hovered: boolean) => React.ReactNode;
+  active: boolean;
 }) {
   const [hovered, setHovered] = useState(false);
   return (
     <Link href={href} onClick={onClose} style={{
       display: 'flex', alignItems: 'center', gap: 12,
       padding: '14px 24px', textDecoration: 'none',
-      color: 'var(--text)', fontSize: 15,
-      background: hovered ? 'rgba(var(--fg-rgb),0.04)' : 'transparent',
-      transition: 'background 0.15s',
+      color: active ? 'var(--accent)' : 'var(--text)',
+      fontSize: 15, position: 'relative',
+      background: active
+        ? 'rgba(var(--accent-rgb),0.08)'
+        : hovered ? 'rgba(var(--fg-rgb),0.04)' : 'transparent',
+      transition: 'background 0.15s, color 0.15s',
     }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
-      {renderIcon(hovered)}
+      {/* Active indicator bar on the left */}
+      {active && (
+        <div style={{
+          position: 'absolute', left: 0, top: '20%', bottom: '20%',
+          width: 3, borderRadius: '0 3px 3px 0',
+          background: 'var(--accent)',
+          boxShadow: '0 0 8px rgba(var(--accent-rgb),0.6)',
+        }} />
+      )}
+      {renderIcon(hovered || active)}
       {label}
     </Link>
   );
@@ -40,6 +53,7 @@ function PanelLink({
 
 export default function SidePanel({ isOpen, onClose }: SidePanelProps) {
   const router = useRouter();
+  const pathname = usePathname();
   const [logoutHovered, setLogoutHovered] = useState(false);
 
   // Prefetch all routes the moment the panel opens so clicking feels instant
@@ -103,7 +117,7 @@ export default function SidePanel({ isOpen, onClose }: SidePanelProps) {
         <nav style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
 
           {/* Home — the dashboard grid assembles itself into a house */}
-          <PanelLink href="/dashboard" label="Home" onClose={onClose} renderIcon={hovered => (
+          <PanelLink href="/dashboard" label="Home" onClose={onClose} active={pathname === '/dashboard'} renderIcon={hovered => (
             <span style={{ position: 'relative', width: 18, height: 18, display: 'inline-block', flexShrink: 0 }}>
               <LayoutDashboard size={18} strokeWidth={1.8} color="var(--text-secondary)" style={{
                 position: 'absolute', inset: 0,
@@ -121,7 +135,7 @@ export default function SidePanel({ isOpen, onClose }: SidePanelProps) {
           )} />
 
           {/* Settings — the gear rolls in place like a wheel */}
-          <PanelLink href="/settings" label="Settings" onClose={onClose} renderIcon={hovered => (
+          <PanelLink href="/settings" label="Settings" onClose={onClose} active={pathname === '/settings'} renderIcon={hovered => (
             <Settings size={18} strokeWidth={1.8} color={hovered ? 'var(--accent)' : 'var(--text-secondary)'} style={{
               flexShrink: 0,
               transform: hovered ? 'rotate(360deg)' : 'rotate(0deg)',
@@ -131,7 +145,7 @@ export default function SidePanel({ isOpen, onClose }: SidePanelProps) {
 
           {/* My profile — he straightens up his outfit like a gentleman.
               key remounts the icon on hover so the animation always replays */}
-          <PanelLink href="/profile" label="My profile" onClose={onClose} renderIcon={hovered => (
+          <PanelLink href="/profile" label="My profile" onClose={onClose} active={pathname === '/profile'} renderIcon={hovered => (
             <User key={hovered ? 'tidy' : 'idle'} size={18} strokeWidth={1.8}
               color={hovered ? 'var(--accent)' : 'var(--text-secondary)'} style={{
               flexShrink: 0,
@@ -142,7 +156,7 @@ export default function SidePanel({ isOpen, onClose }: SidePanelProps) {
           )} />
 
           {/* Progress log — clipboard fades out, checkmark draws itself on hover */}
-          <PanelLink href="/progress" label="Progress log" onClose={onClose} renderIcon={hovered => (
+          <PanelLink href="/progress" label="Progress log" onClose={onClose} active={pathname === '/progress'} renderIcon={hovered => (
             <span style={{ position: 'relative', width: 18, height: 18, display: 'inline-block', flexShrink: 0 }}>
               <ClipboardList size={18} strokeWidth={1.8} color="var(--text-secondary)" style={{
                 position: 'absolute', inset: 0,
@@ -172,7 +186,7 @@ export default function SidePanel({ isOpen, onClose }: SidePanelProps) {
           )} />
 
           {/* Achievements — flakes burst from the trophy on hover */}
-          <PanelLink href="/achievements" label="Achievements" onClose={onClose} renderIcon={hovered => (
+          <PanelLink href="/achievements" label="Achievements" onClose={onClose} active={pathname === '/achievements'} renderIcon={hovered => (
             // Outer span is 48×48 centred on the 18×18 icon so particles
             // aren't clipped when they travel outward
             <span style={{
