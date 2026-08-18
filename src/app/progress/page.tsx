@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { CheckCircle2, Dumbbell, Clock, Flame } from 'lucide-react';
 import Navbar from '../components/Navbar';
+import SidePanel from '../components/SidePanel';
 import { useIsMobile } from '../hooks/useIsMobile';
 
 interface SessionEntry {
@@ -163,6 +164,7 @@ function SessionCard({ session }: { session: SessionEntry }) {
 export default function ProgressPage() {
   const router = useRouter();
   const isMobile = useIsMobile();
+  const [panelOpen, setPanelOpen] = useState(false);
   const [userName, setUserName] = useState('');
   const [groups, setGroups] = useState<WeekGroup[]>([]);
   const [total, setTotal] = useState(0);
@@ -231,7 +233,8 @@ export default function ProgressPage() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Navbar userName={userName} onMenuOpen={undefined} />
+      <Navbar userName={userName} onMenuOpen={() => setPanelOpen(true)} />
+      <SidePanel isOpen={panelOpen} onClose={() => setPanelOpen(false)} />
 
       <main style={{ flex: 1, padding: isMobile ? '24px 16px 60px' : '40px 24px 80px' }}>
         <div style={{ maxWidth: 680, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 32 }}>

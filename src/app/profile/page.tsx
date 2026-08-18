@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { Plus } from 'lucide-react';
 import Avatar from '../components/Avatar';
 import Navbar from '../components/Navbar';
+import SidePanel from '../components/SidePanel';
 import { useIsMobile } from '../hooks/useIsMobile';
 
 interface UserProfile {
@@ -130,6 +131,7 @@ function InfoRow({ label, value }: { label: string; value: string | number | und
 export default function ProfilePage() {
   const router = useRouter();
   const isMobile = useIsMobile();
+  const [panelOpen, setPanelOpen] = useState(false);
   const [user, setUser] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [weightLogs, setWeightLogs] = useState<WeightEntry[]>([]);
@@ -190,7 +192,8 @@ export default function ProfilePage() {
 
   return (
     <div className="min-h-screen flex flex-col">
-    <Navbar userName={user.name} />
+    <Navbar userName={user.name} onMenuOpen={() => setPanelOpen(true)} />
+      <SidePanel isOpen={panelOpen} onClose={() => setPanelOpen(false)} />
     <main className="flex-1 flex items-center justify-center px-6 py-12 relative overflow-hidden">
       <div style={{
         position: 'absolute', top: '50%', left: '50%',

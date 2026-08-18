@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Check } from 'lucide-react';
 import Navbar from '../components/Navbar';
+import SidePanel from '../components/SidePanel';
 import { useIsMobile } from '../hooks/useIsMobile';
 
 type Theme = 'forma' | 'light';
@@ -97,6 +98,7 @@ function PillGroup<T extends string | number>({
 export default function SettingsPage() {
   const router = useRouter();
   const isMobile = useIsMobile();
+  const [panelOpen, setPanelOpen] = useState(false);
   const [settings, setSettings] = useState<Settings>({ weeklyGoal: 3, weightUnit: 'kg', theme: 'forma', name: '' });
   const [loading, setLoading] = useState(true);
   const [saved, setSaved] = useState(false);
@@ -175,7 +177,8 @@ export default function SettingsPage() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Navbar userName={settings.name} />
+      <Navbar userName={settings.name} onMenuOpen={() => setPanelOpen(true)} />
+      <SidePanel isOpen={panelOpen} onClose={() => setPanelOpen(false)} />
 
       <main style={{ flex: 1, padding: isMobile ? '24px 16px 60px' : '40px 24px 80px' }}>
         <div style={{ maxWidth: 560, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: isMobile ? 20 : 32 }}>
