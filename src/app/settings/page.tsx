@@ -167,14 +167,6 @@ export default function SettingsPage() {
     } finally { setSaving(false); }
   }
 
-  if (loading) {
-    return (
-      <main className="min-h-screen flex items-center justify-center">
-        <p style={{ color: 'var(--text-muted)', fontSize: 14 }}>Loading…</p>
-      </main>
-    );
-  }
-
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar userName={settings.name} onMenuOpen={() => setPanelOpen(true)} />

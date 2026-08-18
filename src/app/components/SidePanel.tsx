@@ -23,7 +23,7 @@ function PanelLink({
 }) {
   const [hovered, setHovered] = useState(false);
   return (
-    <Link href={href} onClick={onClose} style={{
+    <Link href={href} onClick={() => { onClose(); }} style={{
       display: 'flex', alignItems: 'center', gap: 12,
       padding: '14px 24px', textDecoration: 'none',
       color: active ? 'var(--accent)' : 'var(--text)',

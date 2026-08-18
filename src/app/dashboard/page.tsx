@@ -122,7 +122,7 @@ export default function DashboardPage() {
   const [userName, setUserName] = useState('');
   const [weeklyGoal, setWeeklyGoal] = useState(3);
   const [data, setData] = useState<DashboardData | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [panelOpen, setPanelOpen] = useState(false);
   const [started, setStarted] = useState(false);
   const [completing, setCompleting] = useState(false);
@@ -157,6 +157,9 @@ export default function DashboardPage() {
   const TIP_DURATION = 4000;
   const tips = data ? getSuggestions(data.todaySession.muscleGroup, data.lastWorkout, data.currentStreak) : [];
 
+  // Trigger fade-in immediately on mount — don't wait for data
+  useEffect(() => { setTimeout(() => setMounted(true), 40); }, []);
+
   useEffect(() => {
     if (tips.length <= 1) return;
     const interval = setInterval(() => {
@@ -183,11 +186,7 @@ export default function DashboardPage() {
           if (d.todaySession?.completed) { setDone(true); setStarted(true); }
         }
       })
-      .catch(() => router.replace('/login'))
-      .finally(() => {
-        setLoading(false);
-        setTimeout(() => setMounted(true), 40);
-      });
+      .catch(() => router.replace('/login'));
 
     fetch('http://localhost:5000/api/achievements', { credentials: 'include' })
       .then(res => { if (!res.ok) throw new Error(`HTTP ${res.status}`); return res.json(); })
@@ -307,14 +306,6 @@ export default function DashboardPage() {
         setTimeout(() => confetti({ particleCount: 60, spread: 60, origin: { y: 0.4 }, colors: [c('--accent'), c('--accent-3')] }), 300);
       }
     } finally { setCompleting(false); }
-  }
-
-  if (loading) {
-    return (
-      <main className="min-h-screen flex items-center justify-center">
-        <p style={{ color: 'var(--text-muted)', fontSize: 14 }}>Loading…</p>
-      </main>
-    );
   }
 
   const isRest = data?.todaySession?.workoutName === 'Rest day';

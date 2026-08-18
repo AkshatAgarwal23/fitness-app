@@ -56,6 +56,8 @@ export default function AchievementsPage() {
   const [loading, setLoading] = useState(true);
   const [mounted, setMounted] = useState(false);
 
+  useEffect(() => { setTimeout(() => setMounted(true), 40); }, []);
+
   useEffect(() => {
     fetch('http://localhost:5000/api/achievements', { credentials: 'include' })
       .then(res => {
@@ -64,11 +66,7 @@ export default function AchievementsPage() {
         return res.json() as Promise<AchievementData[]>;
       })
       .then(data => { if (data) setAchievements(data); })
-      .catch(err => console.error('Achievements fetch error:', err))
-      .finally(() => {
-        setLoading(false);
-        setTimeout(() => setMounted(true), 40);
-      });
+      .catch(err => console.error('Achievements fetch error:', err));
   }, [router]);
 
   const unlockedCount = achievements.filter(a => a.unlocked).length;
@@ -80,14 +78,6 @@ export default function AchievementsPage() {
       transform: mounted ? 'translateY(0)' : 'translateY(20px)',
       transition: `opacity 0.55s cubic-bezier(0.16,1,0.3,1) ${delay}ms, transform 0.55s cubic-bezier(0.16,1,0.3,1) ${delay}ms`,
     };
-  }
-
-  if (loading) {
-    return (
-      <main className="min-h-screen flex items-center justify-center">
-        <p style={{ color: 'var(--text-muted)', fontSize: 14 }}>Loading…</p>
-      </main>
-    );
   }
 
   return (

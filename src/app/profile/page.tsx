@@ -175,14 +175,6 @@ export default function ProfilePage() {
     } finally { setSaving(false); }
   }
 
-  if (loading) {
-    return (
-      <main className="min-h-screen flex items-center justify-center">
-        <p style={{ color: 'var(--text-muted)', fontSize: 14 }}>Loading…</p>
-      </main>
-    );
-  }
-
   if (!user) return null;
 
   const heightDisplay = user.height ? `${user.height} ${user.heightUnit ?? 'cm'}` : undefined;

@@ -173,32 +173,24 @@ export default function ProgressPage() {
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
 
-  // Fetch user name for navbar
+  // Fetch profile + first page in parallel
   useEffect(() => {
-    fetch('http://localhost:5000/api/profile', { credentials: 'include' })
-      .then(res => { if (res.status === 401) { router.replace('/login'); return null; } return res.json(); })
-      .then(data => { if (data) setUserName(data.name ?? ''); })
-      .catch(() => router.replace('/login'));
-  }, [router]);
-
-  // Fetch first page
-  useEffect(() => {
-    fetch('http://localhost:5000/api/sessions/history?page=1&limit=10', { credentials: 'include' })
-      .then(res => {
-        if (res.status === 401) { router.replace('/login'); return null; }
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        return res.json() as Promise<HistoryResponse>;
-      })
-      .then(data => {
-        if (data) {
-          setGroups(groupByWeek(data.sessions));
-          setTotal(data.total);
-          setHasMore(data.hasMore);
-          setPage(1);
-        }
-      })
-      .catch(err => console.error('Progress fetch error:', err))
-      .finally(() => setLoading(false));
+    Promise.all([
+      fetch('http://localhost:5000/api/profile', { credentials: 'include' }),
+      fetch('http://localhost:5000/api/sessions/history?page=1&limit=10', { credentials: 'include' }),
+    ]).then(async ([profileRes, historyRes]) => {
+      if (profileRes.status === 401 || historyRes.status === 401) {
+        router.replace('/login'); return;
+      }
+      const [profile, history] = await Promise.all([profileRes.json(), historyRes.json()]);
+      setUserName(profile.name ?? '');
+      setGroups(groupByWeek(history.sessions));
+      setTotal(history.total);
+      setHasMore(history.hasMore);
+      setPage(1);
+    })
+    .catch(err => console.error('Progress fetch error:', err))
+    .finally(() => setLoading(false));
   }, [router]);
 
   async function loadMore() {
@@ -221,14 +213,6 @@ export default function ProgressPage() {
     } finally {
       setLoadingMore(false);
     }
-  }
-
-  if (loading) {
-    return (
-      <main className="min-h-screen flex items-center justify-center">
-        <p style={{ color: 'var(--text-muted)', fontSize: 14 }}>Loading…</p>
-      </main>
-    );
   }
 
   return (
