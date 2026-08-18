@@ -6,6 +6,7 @@ import { Trophy, Star, Flame, Zap, Shield, Dumbbell, TrendingUp, Lock, Sun, Moon
 import Navbar from '../components/Navbar';
 import SidePanel from '../components/SidePanel';
 import { useIsMobile } from '../hooks/useIsMobile';
+import { getCached, setCached } from '../lib/cache';
 
 interface AchievementData {
   id: string;
@@ -59,13 +60,16 @@ export default function AchievementsPage() {
   useEffect(() => { setTimeout(() => setMounted(true), 40); }, []);
 
   useEffect(() => {
+    const cached = getCached<AchievementData[]>('achievements');
+    if (cached) setAchievements(cached);
+
     fetch('http://localhost:5000/api/achievements', { credentials: 'include' })
       .then(res => {
         if (res.status === 401) { router.replace('/login'); return null; }
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         return res.json() as Promise<AchievementData[]>;
       })
-      .then(data => { if (data) setAchievements(data); })
+      .then(data => { if (data) { setAchievements(data); setCached('achievements', data); } })
       .catch(err => console.error('Achievements fetch error:', err));
   }, [router]);
 

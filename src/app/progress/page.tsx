@@ -6,6 +6,7 @@ import { CheckCircle2, Dumbbell, Clock, Flame } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import SidePanel from '../components/SidePanel';
 import { useIsMobile } from '../hooks/useIsMobile';
+import { getCached, setCached } from '../lib/cache';
 
 interface SessionEntry {
   _id: string;
@@ -175,6 +176,12 @@ export default function ProgressPage() {
 
   // Fetch profile + first page in parallel
   useEffect(() => {
+    // Show cached data immediately
+    const cp = getCached<{ name: string }>('profile');
+    if (cp) setUserName(cp.name ?? '');
+    const ch = getCached<{ sessions: SessionEntry[]; total: number; hasMore: boolean }>('progress-page-1');
+    if (ch) { setGroups(groupByWeek(ch.sessions)); setTotal(ch.total); setHasMore(ch.hasMore); }
+
     Promise.all([
       fetch('http://localhost:5000/api/profile', { credentials: 'include' }),
       fetch('http://localhost:5000/api/sessions/history?page=1&limit=10', { credentials: 'include' }),
@@ -188,6 +195,7 @@ export default function ProgressPage() {
       setTotal(history.total);
       setHasMore(history.hasMore);
       setPage(1);
+      setCached('progress-page-1', history);
     })
     .catch(err => console.error('Progress fetch error:', err))
     .finally(() => setLoading(false));

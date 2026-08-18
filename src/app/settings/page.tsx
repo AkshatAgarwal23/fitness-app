@@ -6,6 +6,7 @@ import { Check } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import SidePanel from '../components/SidePanel';
 import { useIsMobile } from '../hooks/useIsMobile';
+import { getCached, setCached } from '../lib/cache';
 
 type Theme = 'forma' | 'light';
 
@@ -127,24 +128,30 @@ export default function SettingsPage() {
   }
 
   useEffect(() => {
+    // Show cached profile immediately
+    const cached = getCached<{ name: string; weeklyGoal: number; weightUnit: string; theme: string }>('profile');
+    if (cached) {
+      let theme: Theme = (cached.theme as Theme) ?? 'forma';
+      try {
+        const local = localStorage.getItem('forma-theme');
+        if (local === 'forma' || local === 'light') theme = local as Theme;
+        if (local === 'dark') theme = 'forma';
+      } catch {}
+      setSettings({ weeklyGoal: cached.weeklyGoal ?? 3, weightUnit: (cached.weightUnit as 'kg' | 'lbs') ?? 'kg', theme, name: cached.name ?? '' });
+    }
+
     fetch('http://localhost:5000/api/profile', { credentials: 'include' })
       .then(res => { if (res.status === 401) { router.replace('/login'); return null; } return res.json(); })
       .then(data => {
         if (data) {
-          // The theme applied on this device wins — never let a stale
-          // backend value override what the user is currently seeing.
           let theme: Theme = data.theme ?? 'forma';
           try {
             const local = localStorage.getItem('forma-theme');
-            if (local === 'forma' || local === 'light') theme = local;
-            if (local === 'dark') theme = 'forma'; // dark mode was removed
+            if (local === 'forma' || local === 'light') theme = local as Theme;
+            if (local === 'dark') theme = 'forma';
           } catch {}
-          setSettings({
-            weeklyGoal: data.weeklyGoal ?? 3,
-            weightUnit: data.weightUnit ?? 'kg',
-            theme,
-            name: data.name ?? '',
-          });
+          setSettings({ weeklyGoal: data.weeklyGoal ?? 3, weightUnit: data.weightUnit ?? 'kg', theme, name: data.name ?? '' });
+          setCached('profile', data);
         }
       })
       .catch(() => router.replace('/login'))

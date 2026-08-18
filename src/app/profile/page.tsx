@@ -8,6 +8,7 @@ import Avatar from '../components/Avatar';
 import Navbar from '../components/Navbar';
 import SidePanel from '../components/SidePanel';
 import { useIsMobile } from '../hooks/useIsMobile';
+import { getCached, setCached } from '../lib/cache';
 
 interface UserProfile {
   name: string;
@@ -132,7 +133,7 @@ export default function ProfilePage() {
   const router = useRouter();
   const isMobile = useIsMobile();
   const [panelOpen, setPanelOpen] = useState(false);
-  const [user, setUser] = useState<UserProfile | null>(null);
+  const [user, setUser] = useState<UserProfile>({ name: '', email: '' });
   const [loading, setLoading] = useState(true);
   const [weightLogs, setWeightLogs] = useState<WeightEntry[]>([]);
   const [newWeight, setNewWeight] = useState('');
@@ -140,15 +141,21 @@ export default function ProfilePage() {
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
+    // Show cached profile immediately
+    const cached = getCached<UserProfile>('profile');
+    if (cached) setUser(cached);
+    const cachedWeight = getCached<WeightEntry[]>('weight');
+    if (cachedWeight) setWeightLogs(cachedWeight);
+
     fetch('http://localhost:5000/api/profile', { credentials: 'include' })
       .then(res => { if (res.status === 401) { router.replace('/login'); return null; } return res.json(); })
-      .then(data => { if (data) setUser(data); })
+      .then(data => { if (data) { setUser(data); setCached('profile', data); } })
       .catch(() => router.replace('/login'))
       .finally(() => setLoading(false));
 
     fetch('http://localhost:5000/api/weight', { credentials: 'include' })
       .then(res => res.ok ? res.json() : [])
-      .then(data => setWeightLogs(data ?? []))
+      .then(data => { setWeightLogs(data ?? []); setCached('weight', data ?? []); })
       .catch(() => {});
   }, [router]);
 
@@ -168,14 +175,14 @@ export default function ProfilePage() {
         const entry = await res.json();
         setWeightLogs(prev => {
           const filtered = prev.filter(l => l._id !== entry._id);
-          return [...filtered, entry].slice(-30);
+          const next = [...filtered, entry].slice(-30);
+          setCached('weight', next);
+          return next;
         });
         setNewWeight('');
       }
     } finally { setSaving(false); }
   }
-
-  if (!user) return null;
 
   const heightDisplay = user.height ? `${user.height} ${user.heightUnit ?? 'cm'}` : undefined;
   const latestWeight = weightLogs.length > 0 ? weightLogs[weightLogs.length - 1].weight : null;

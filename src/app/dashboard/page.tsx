@@ -7,6 +7,7 @@ import Navbar from '../components/Navbar';
 import SidePanel from '../components/SidePanel';
 import Toast, { ToastItem } from '../components/Toast';
 import { useIsMobile } from '../hooks/useIsMobile';
+import { getCached, setCached } from '../lib/cache';
 
 interface StreakDay {
   day: string;
@@ -173,30 +174,29 @@ export default function DashboardPage() {
   }, [tips.length]);
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/profile', { credentials: 'include' })
-      .then(res => { if (res.status === 401) { router.replace('/login'); return null; } return res.json(); })
-      .then(p => { if (p) { setUserName(p.name || ''); setWeeklyGoal(p.weeklyGoal ?? 3); } })
-      .catch(() => router.replace('/login'));
+    // Show cached data instantly while fresh data loads in background
+    const cp = getCached<{ name: string; weeklyGoal: number }>('profile');
+    if (cp) { setUserName(cp.name || ''); setWeeklyGoal(cp.weeklyGoal ?? 3); }
+    const cd = getCached<DashboardData>('dashboard');
+    if (cd) { setData(cd); if (cd.todaySession?.completed) { setDone(true); setStarted(true); } }
+    const ca = getCached<AchievementData[]>('achievements');
+    if (ca) setAchievements(ca);
+    const cs = getCached<StatsData>('stats');
+    if (cs) setStatsData(cs);
 
-    fetch('http://localhost:5000/api/dashboard', { credentials: 'include' })
-      .then(res => { if (res.status === 401) { router.replace('/login'); return null; } return res.json(); })
-      .then(d => {
-        if (d) {
-          setData(d);
-          if (d.todaySession?.completed) { setDone(true); setStarted(true); }
-        }
-      })
-      .catch(() => router.replace('/login'));
-
-    fetch('http://localhost:5000/api/achievements', { credentials: 'include' })
-      .then(res => { if (!res.ok) throw new Error(`HTTP ${res.status}`); return res.json(); })
-      .then((data: AchievementData[]) => setAchievements(data))
-      .catch(err => console.error('Achievements fetch error:', err));
-
-    fetch('http://localhost:5000/api/stats', { credentials: 'include' })
-      .then(res => { if (!res.ok) throw new Error(`HTTP ${res.status}`); return res.json(); })
-      .then((data: StatsData) => setStatsData(data))
-      .catch(err => console.error('Stats fetch error:', err));
+    Promise.all([
+      fetch('http://localhost:5000/api/profile',      { credentials: 'include' }),
+      fetch('http://localhost:5000/api/dashboard',    { credentials: 'include' }),
+      fetch('http://localhost:5000/api/achievements', { credentials: 'include' }),
+      fetch('http://localhost:5000/api/stats',        { credentials: 'include' }),
+    ]).then(async ([pRes, dRes, aRes, sRes]) => {
+      if (pRes.status === 401 || dRes.status === 401) { router.replace('/login'); return; }
+      const [p, d, a, s] = await Promise.all([pRes.json(), dRes.json(), aRes.json(), sRes.json()]);
+      if (p) { setUserName(p.name || ''); setWeeklyGoal(p.weeklyGoal ?? 3); setCached('profile', p); }
+      if (d) { setData(d); setCached('dashboard', d); if (d.todaySession?.completed) { setDone(true); setStarted(true); } }
+      if (a) { setAchievements(a); setCached('achievements', a); }
+      if (s) { setStatsData(s); setCached('stats', s); }
+    }).catch(() => router.replace('/login'));
   }, [router]);
 
   // Count-up animation for streak and sessions
@@ -293,7 +293,7 @@ export default function DashboardPage() {
           // Refresh achievements list
           fetch('http://localhost:5000/api/achievements', { credentials: 'include' })
             .then(r => r.json())
-            .then((data: AchievementData[]) => setAchievements(data))
+            .then((data: AchievementData[]) => { setAchievements(data); setCached('achievements', data); })
             .catch(() => {});
         }
 
