@@ -121,14 +121,12 @@ const card = {
 
 export default function DashboardPage() {
   const router = useRouter();
-  const [userName, setUserName] = useState('');
-  const [weeklyGoal, setWeeklyGoal] = useState(3);
-  const [data, setData] = useState<DashboardData | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [weeklyGoal, setWeeklyGoal] = useState(() => getCached<{ weeklyGoal: number }>('profile')?.weeklyGoal ?? 3);
+  const [data, setData] = useState<DashboardData | null>(() => getCached<DashboardData>('dashboard'));
   const [panelOpen, setPanelOpen] = useState(false);
-  const [started, setStarted] = useState(false);
+  const [started, setStarted] = useState(() => getCached<DashboardData>('dashboard')?.todaySession?.completed ?? false);
   const [completing, setCompleting] = useState(false);
-  const [done, setDone] = useState(false);
+  const [done, setDone] = useState(() => getCached<DashboardData>('dashboard')?.todaySession?.completed ?? false);
   const [tipIndex, setTipIndex] = useState(0);
   const [tipFading, setTipFading] = useState(false);
   const [timerSeconds, setTimerSeconds] = useState(0);
@@ -145,8 +143,8 @@ export default function DashboardPage() {
   const setTimerRef = useRef<NodeJS.Timeout | null>(null);
   const restTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  const [achievements, setAchievements] = useState<AchievementData[]>([]);
-  const [statsData, setStatsData] = useState<StatsData | null>(null);
+  const [achievements, setAchievements] = useState<AchievementData[]>(() => getCached<AchievementData[]>('achievements') ?? []);
+  const [statsData, setStatsData] = useState<StatsData | null>(() => getCached<StatsData>('stats'));
   const [toasts, setToasts] = useState<ToastItem[]>([]);
 
   const dismissToast = useCallback((id: string) => {
@@ -172,16 +170,6 @@ export default function DashboardPage() {
   }, [tips.length]);
 
   useEffect(() => {
-    // Show cached data instantly while fresh data loads in background
-    const cp = getCached<{ name: string; weeklyGoal: number }>('profile');
-    if (cp) { setUserName(cp.name || ''); setWeeklyGoal(cp.weeklyGoal ?? 3); }
-    const cd = getCached<DashboardData>('dashboard');
-    if (cd) { setData(cd); if (cd.todaySession?.completed) { setDone(true); setStarted(true); } }
-    const ca = getCached<AchievementData[]>('achievements');
-    if (ca) setAchievements(ca);
-    const cs = getCached<StatsData>('stats');
-    if (cs) setStatsData(cs);
-
     Promise.all([
       fetch('http://localhost:5000/api/profile',      { credentials: 'include' }),
       fetch('http://localhost:5000/api/dashboard',    { credentials: 'include' }),
@@ -190,8 +178,12 @@ export default function DashboardPage() {
     ]).then(async ([pRes, dRes, aRes, sRes]) => {
       if (pRes.status === 401 || dRes.status === 401) { router.replace('/login'); return; }
       const [p, d, a, s] = await Promise.all([pRes.json(), dRes.json(), aRes.json(), sRes.json()]);
-      if (p) { setUserName(p.name || ''); setWeeklyGoal(p.weeklyGoal ?? 3); setCached('profile', p); }
-      if (d) { setData(d); setCached('dashboard', d); if (d.todaySession?.completed) { setDone(true); setStarted(true); } }
+      if (p) { setWeeklyGoal(p.weeklyGoal ?? 3); setCached('profile', p); }
+      if (d) {
+        setData(d);
+        setCached('dashboard', d);
+        if (d.todaySession?.completed) { setDone(true); setStarted(true); }
+      }
       if (a) { setAchievements(a); setCached('achievements', a); }
       if (s) { setStatsData(s); setCached('stats', s); }
     }).catch(() => router.replace('/login'));
@@ -210,6 +202,7 @@ export default function DashboardPage() {
       if (i >= 20) clearInterval(interval);
     }, 30);
     return () => clearInterval(interval);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data?.currentStreak, data?.sessionsThisWeek]);
 
   // Overall workout timer

@@ -103,8 +103,17 @@ export default function SettingsPage() {
   const isMobile = useIsMobile();
   const fi = useFadeIn();
   const [panelOpen, setPanelOpen] = useState(false);
-  const [settings, setSettings] = useState<Settings>({ weeklyGoal: 3, weightUnit: 'kg', theme: 'forma', name: '' });
-  const [loading, setLoading] = useState(true);
+  const [settings, setSettings] = useState<Settings>(() => {
+    const cached = getCached<{ name: string; weeklyGoal: number; weightUnit: string; theme: string }>('profile');
+    if (!cached) return { weeklyGoal: 3, weightUnit: 'kg', theme: 'forma', name: '' };
+    let theme: Theme = (cached.theme as Theme) ?? 'forma';
+    try {
+      const local = localStorage.getItem('forma-theme');
+      if (local === 'forma' || local === 'light') theme = local as Theme;
+      if (local === 'dark') theme = 'forma';
+    } catch {}
+    return { weeklyGoal: cached.weeklyGoal ?? 3, weightUnit: (cached.weightUnit as 'kg' | 'lbs') ?? 'kg', theme, name: cached.name ?? '' };
+  });
   const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
@@ -131,18 +140,6 @@ export default function SettingsPage() {
   }
 
   useEffect(() => {
-    // Show cached profile immediately
-    const cached = getCached<{ name: string; weeklyGoal: number; weightUnit: string; theme: string }>('profile');
-    if (cached) {
-      let theme: Theme = (cached.theme as Theme) ?? 'forma';
-      try {
-        const local = localStorage.getItem('forma-theme');
-        if (local === 'forma' || local === 'light') theme = local as Theme;
-        if (local === 'dark') theme = 'forma';
-      } catch {}
-      setSettings({ weeklyGoal: cached.weeklyGoal ?? 3, weightUnit: (cached.weightUnit as 'kg' | 'lbs') ?? 'kg', theme, name: cached.name ?? '' });
-    }
-
     fetch('http://localhost:5000/api/profile', { credentials: 'include' })
       .then(res => { if (res.status === 401) { router.replace('/login'); return null; } return res.json(); })
       .then(data => {
@@ -157,8 +154,7 @@ export default function SettingsPage() {
           setCached('profile', data);
         }
       })
-      .catch(() => router.replace('/login'))
-      .finally(() => setLoading(false));
+      .catch(() => router.replace('/login'));
   }, [router]);
 
   async function save(patch: Partial<Settings>) {

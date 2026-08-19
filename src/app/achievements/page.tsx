@@ -123,14 +123,10 @@ export default function AchievementsPage() {
   const router = useRouter();
   const isMobile = useIsMobile();
   const [panelOpen, setPanelOpen] = useState(false);
-  const [achievements, setAchievements] = useState<AchievementData[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [achievements, setAchievements] = useState<AchievementData[]>(() => getCached<AchievementData[]>('achievements') ?? []);
   const fi = useFadeIn();
 
   useEffect(() => {
-    const cached = getCached<AchievementData[]>('achievements');
-    if (cached) setAchievements(cached);
-
     fetch('http://localhost:5000/api/achievements', { credentials: 'include' })
       .then(res => {
         if (res.status === 401) { router.replace('/login'); return null; }

@@ -177,22 +177,18 @@ export default function ProgressPage() {
   const isMobile = useIsMobile();
   const fi = useFadeIn();
   const [panelOpen, setPanelOpen] = useState(false);
-  const [userName, setUserName] = useState('');
-  const [groups, setGroups] = useState<WeekGroup[]>([]);
-  const [total, setTotal] = useState(0);
+  const [userName, setUserName] = useState(() => getCached<{ name: string }>('profile')?.name ?? '');
+  const [groups, setGroups] = useState<WeekGroup[]>(() => {
+    const ch = getCached<{ sessions: SessionEntry[] }>('progress-page-1');
+    return ch ? groupByWeek(ch.sessions) : [];
+  });
+  const [total, setTotal] = useState(() => getCached<{ total: number }>('progress-page-1')?.total ?? 0);
   const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [hasMore, setHasMore] = useState(() => getCached<{ hasMore: boolean }>('progress-page-1')?.hasMore ?? false);
   const [loadingMore, setLoadingMore] = useState(false);
 
   // Fetch profile + first page in parallel
   useEffect(() => {
-    // Show cached data immediately
-    const cp = getCached<{ name: string }>('profile');
-    if (cp) setUserName(cp.name ?? '');
-    const ch = getCached<{ sessions: SessionEntry[]; total: number; hasMore: boolean }>('progress-page-1');
-    if (ch) { setGroups(groupByWeek(ch.sessions)); setTotal(ch.total); setHasMore(ch.hasMore); }
-
     Promise.all([
       fetch('http://localhost:5000/api/profile', { credentials: 'include' }),
       fetch('http://localhost:5000/api/sessions/history?page=1&limit=10', { credentials: 'include' }),
@@ -208,8 +204,7 @@ export default function ProgressPage() {
       setPage(1);
       setCached('progress-page-1', history);
     })
-    .catch(err => console.error('Progress fetch error:', err))
-    .finally(() => setLoading(false));
+    .catch(err => console.error('Progress fetch error:', err));
   }, [router]);
 
   async function loadMore() {

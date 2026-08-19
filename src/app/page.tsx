@@ -205,7 +205,7 @@ export default function LandingPage() {
 
           {/* Scroll hint */}
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
-            <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--text)', letterSpacing: '0.12em', textTransform: 'uppercase', opacity: 0.75 }}>What's inside</span>
+            <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--text)', letterSpacing: '0.12em', textTransform: 'uppercase', opacity: 0.75 }}>{"What's inside"}</span>
             <div style={{
               width: 30, height: 30, borderRadius: '50%',
               display: 'flex', alignItems: 'center', justifyContent: 'center',

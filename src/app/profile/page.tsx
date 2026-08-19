@@ -140,25 +140,17 @@ export default function ProfilePage() {
   const isMobile = useIsMobile();
   const fi = useFadeIn();
   const [panelOpen, setPanelOpen] = useState(false);
-  const [user, setUser] = useState<UserProfile>({ name: '', email: '' });
-  const [loading, setLoading] = useState(true);
-  const [weightLogs, setWeightLogs] = useState<WeightEntry[]>([]);
+  const [user, setUser] = useState<UserProfile>(() => getCached<UserProfile>('profile') ?? { name: '', email: '' });
+  const [weightLogs, setWeightLogs] = useState<WeightEntry[]>(() => getCached<WeightEntry[]>('weight') ?? []);
   const [newWeight, setNewWeight] = useState('');
   const [saving, setSaving] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    // Show cached profile immediately
-    const cached = getCached<UserProfile>('profile');
-    if (cached) setUser(cached);
-    const cachedWeight = getCached<WeightEntry[]>('weight');
-    if (cachedWeight) setWeightLogs(cachedWeight);
-
     fetch('http://localhost:5000/api/profile', { credentials: 'include' })
       .then(res => { if (res.status === 401) { router.replace('/login'); return null; } return res.json(); })
       .then(data => { if (data) { setUser(data); setCached('profile', data); } })
-      .catch(() => router.replace('/login'))
-      .finally(() => setLoading(false));
+      .catch(() => router.replace('/login'));
 
     fetch('http://localhost:5000/api/weight', { credentials: 'include' })
       .then(res => res.ok ? res.json() : [])
