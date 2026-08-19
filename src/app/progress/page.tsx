@@ -6,6 +6,7 @@ import { CheckCircle2, Dumbbell, Clock, Flame } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import SidePanel from '../components/SidePanel';
 import { useIsMobile } from '../hooks/useIsMobile';
+import { useFadeIn } from '../hooks/useFadeIn';
 import { getCached, setCached } from '../lib/cache';
 
 interface SessionEntry {
@@ -112,16 +113,25 @@ function EmptyState() {
   );
 }
 
-function SessionCard({ session }: { session: SessionEntry }) {
+function SessionCard({ session, index }: { session: SessionEntry; index: number }) {
+  const [hovered, setHovered] = useState(false);
   return (
-    <div style={{
+    <div
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
       display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between',
       gap: 16,
       padding: '16px 20px',
       borderRadius: 12,
-      background: 'var(--card-bg)',
-      border: '1px solid var(--card-border)',
+      background: hovered ? 'rgba(var(--accent-rgb),0.05)' : 'var(--card-bg)',
+      border: `1px solid ${hovered ? 'rgba(var(--accent-rgb),0.2)' : 'var(--card-border)'}`,
       backdropFilter: 'blur(24px)',
+      transform: hovered ? 'translateY(-2px)' : 'translateY(0)',
+      boxShadow: hovered ? '0 6px 20px rgba(0,0,0,0.18)' : 'none',
+      transition: 'transform 0.22s cubic-bezier(0.16,1,0.3,1), background 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease',
+      animation: 'slideInLeft 0.45s cubic-bezier(0.16,1,0.3,1) both',
+      animationDelay: `${Math.min(index * 50, 400)}ms`,
     }}>
       {/* Left: date + workout info */}
       <div style={{ flex: 1, minWidth: 0 }}>
@@ -165,6 +175,7 @@ function SessionCard({ session }: { session: SessionEntry }) {
 export default function ProgressPage() {
   const router = useRouter();
   const isMobile = useIsMobile();
+  const fi = useFadeIn();
   const [panelOpen, setPanelOpen] = useState(false);
   const [userName, setUserName] = useState('');
   const [groups, setGroups] = useState<WeekGroup[]>([]);
@@ -232,7 +243,7 @@ export default function ProgressPage() {
         <div style={{ maxWidth: 680, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 32 }}>
 
           {/* Page header */}
-          <div>
+          <div style={{ ...fi(0) }}>
             <h1 style={{ fontSize: 22, fontWeight: 500, color: 'var(--text)', margin: '0 0 4px', letterSpacing: '-0.025em' }}>
               Progress log
             </h1>
@@ -242,11 +253,11 @@ export default function ProgressPage() {
           </div>
 
           {/* Empty state */}
-          {groups.length === 0 && <EmptyState />}
+          {groups.length === 0 && <div style={{ ...fi(80) }}><EmptyState /></div>}
 
           {/* Week groups */}
-          {groups.map(group => (
-            <div key={group.key} style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          {groups.map((group, gi) => (
+            <div key={group.key} style={{ display: 'flex', flexDirection: 'column', gap: 10, ...fi(80 + gi * 60) }}>
               {/* Week label */}
               <p style={{
                 fontSize: 11, fontWeight: 500, color: 'var(--text-muted)',
@@ -255,8 +266,8 @@ export default function ProgressPage() {
                 {group.label}
               </p>
               {/* Session cards */}
-              {group.sessions.map(session => (
-                <SessionCard key={session._id} session={session} />
+              {group.sessions.map((session, si) => (
+                <SessionCard key={session._id} session={session} index={si} />
               ))}
             </div>
           ))}

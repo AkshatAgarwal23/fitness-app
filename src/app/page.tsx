@@ -40,13 +40,13 @@ function seeded(i: number, salt: number) {
 }
 
 const STARS = Array.from({ length: 34 }, (_, i) => ({
-  left: seeded(i, 1) * 100,                    // % across the screen
-  top: seeded(i, 2) * 100,                     // starting height
-  size: 1 + seeded(i, 3) * 1.6,                // 1–2.6px
-  driftDuration: 60 + seeded(i, 4) * 80,       // 60–140s to float up
-  twinkleDuration: 2.5 + seeded(i, 5) * 4,     // 2.5–6.5s pulse
-  delay: -seeded(i, 6) * 140,                  // negative = already mid-animation
-  green: seeded(i, 7) > 0.75,                  // ~25% get a faint accent tint
+  left: +(seeded(i, 1) * 100).toFixed(4),
+  top: +(seeded(i, 2) * 100).toFixed(4),
+  size: +(1 + seeded(i, 3) * 1.6).toFixed(4),
+  driftDuration: +(60 + seeded(i, 4) * 80).toFixed(4),
+  twinkleDuration: +(2.5 + seeded(i, 5) * 4).toFixed(4),
+  delay: +(-(seeded(i, 6) * 140)).toFixed(4),
+  green: seeded(i, 7) > 0.75,
 }));
 
 function FeatureCard({ Icon, title, desc }: { Icon: typeof Dumbbell; title: string; desc: string }) {

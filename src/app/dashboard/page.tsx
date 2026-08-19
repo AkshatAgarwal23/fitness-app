@@ -7,6 +7,7 @@ import Navbar from '../components/Navbar';
 import SidePanel from '../components/SidePanel';
 import Toast, { ToastItem } from '../components/Toast';
 import { useIsMobile } from '../hooks/useIsMobile';
+import { useFadeIn } from '../hooks/useFadeIn';
 import { getCached, setCached } from '../lib/cache';
 
 interface StreakDay {
@@ -135,7 +136,6 @@ export default function DashboardPage() {
   const [displayStreak, setDisplayStreak] = useState(0);
   const [displaySessions, setDisplaySessions] = useState(0);
   const [expanded, setExpanded] = useState(false);
-  const [mounted, setMounted] = useState(false);
   const [currentSet, setCurrentSet] = useState(0);
   const [completedSets, setCompletedSets] = useState<number[]>([]);
   const [setSeconds, setSetSeconds] = useState(0);
@@ -154,12 +154,10 @@ export default function DashboardPage() {
   }, []);
 
   const isMobile = useIsMobile();
+  const fi = useFadeIn();
   const { greeting, Icon: TimeIcon } = getTimeOfDay();
   const TIP_DURATION = 4000;
   const tips = data ? getSuggestions(data.todaySession.muscleGroup, data.lastWorkout, data.currentStreak) : [];
-
-  // Trigger fade-in immediately on mount — don't wait for data
-  useEffect(() => { setTimeout(() => setMounted(true), 40); }, []);
 
   useEffect(() => {
     if (tips.length <= 1) return;
@@ -309,14 +307,6 @@ export default function DashboardPage() {
   }
 
   const isRest = data?.todaySession?.workoutName === 'Rest day';
-
-  function fi(delay: number): React.CSSProperties {
-    return {
-      opacity: mounted ? 1 : 0,
-      transform: mounted ? 'translateY(0)' : 'translateY(20px)',
-      transition: `opacity 0.55s cubic-bezier(0.16,1,0.3,1) ${delay}ms, transform 0.55s cubic-bezier(0.16,1,0.3,1) ${delay}ms`,
-    };
-  }
 
   return (
     <div className="min-h-screen flex flex-col">

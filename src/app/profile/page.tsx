@@ -8,6 +8,7 @@ import Avatar from '../components/Avatar';
 import Navbar from '../components/Navbar';
 import SidePanel from '../components/SidePanel';
 import { useIsMobile } from '../hooks/useIsMobile';
+import { useFadeIn } from '../hooks/useFadeIn';
 import { getCached, setCached } from '../lib/cache';
 
 interface UserProfile {
@@ -119,10 +120,15 @@ function WeightChart({ logs }: { logs: WeightEntry[] }) {
   );
 }
 
-function InfoRow({ label, value }: { label: string; value: string | number | undefined }) {
+function InfoRow({ label, value, index = 0 }: { label: string; value: string | number | undefined; index?: number }) {
   if (value === undefined || value === null || value === '') return null;
   return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '13px 0', borderBottom: '1px solid var(--surface-2)' }}>
+    <div style={{
+      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+      padding: '13px 0', borderBottom: '1px solid var(--surface-2)',
+      animation: 'slideInLeft 0.45s cubic-bezier(0.16,1,0.3,1) both',
+      animationDelay: `${160 + index * 70}ms`,
+    }}>
       <span style={{ fontSize: 12, textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: 500, color: 'var(--text-muted)' }}>{label}</span>
       <span style={{ fontSize: 14, color: 'var(--text)' }}>{value}</span>
     </div>
@@ -132,6 +138,7 @@ function InfoRow({ label, value }: { label: string; value: string | number | und
 export default function ProfilePage() {
   const router = useRouter();
   const isMobile = useIsMobile();
+  const fi = useFadeIn();
   const [panelOpen, setPanelOpen] = useState(false);
   const [user, setUser] = useState<UserProfile>({ name: '', email: '' });
   const [loading, setLoading] = useState(true);
@@ -209,6 +216,7 @@ export default function ProfilePage() {
         WebkitBackdropFilter: 'blur(24px)',
         border: '1px solid rgba(var(--fg-rgb),0.07)',
         boxShadow: '0 8px 48px rgba(0,0,0,0.6), inset 0 1px 0 rgba(var(--fg-rgb),0.05)',
+        ...fi(0),
       }}>
 
         {/* Profile header */}
@@ -223,10 +231,10 @@ export default function ProfilePage() {
 
         {/* Info rows */}
         <div style={{ padding: isMobile ? '0 20px' : '0 32px' }}>
-          <InfoRow label="Age" value={user.age} />
-          <InfoRow label="Height" value={heightDisplay} />
-          <InfoRow label="Weight" value={user.weight ? `${user.weight} kg` : undefined} />
-          <InfoRow label="Contact" value={user.contact} />
+          <InfoRow label="Age" value={user.age} index={0} />
+          <InfoRow label="Height" value={heightDisplay} index={1} />
+          <InfoRow label="Weight" value={user.weight ? `${user.weight} kg` : undefined} index={2} />
+          <InfoRow label="Contact" value={user.contact} index={3} />
         </div>
 
         {/* Weight logger */}

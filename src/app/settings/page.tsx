@@ -6,6 +6,7 @@ import { Check } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import SidePanel from '../components/SidePanel';
 import { useIsMobile } from '../hooks/useIsMobile';
+import { useFadeIn } from '../hooks/useFadeIn';
 import { getCached, setCached } from '../lib/cache';
 
 type Theme = 'forma' | 'light';
@@ -26,7 +27,7 @@ function applyTheme(theme: Theme) {
   try { localStorage.setItem('forma-theme', theme); } catch {}
 }
 
-function Section({ title, children, compact }: { title: string; children: React.ReactNode; compact?: boolean }) {
+function Section({ title, children, compact, style }: { title: string; children: React.ReactNode; compact?: boolean; style?: React.CSSProperties }) {
   return (
     <div style={{
       borderRadius: 14,
@@ -35,6 +36,7 @@ function Section({ title, children, compact }: { title: string; children: React.
       backdropFilter: 'blur(24px)',
       WebkitBackdropFilter: 'blur(24px)',
       overflow: 'hidden',
+      ...style,
     }}>
       <div style={{ padding: compact ? '12px 16px' : '16px 24px', borderBottom: '1px solid rgba(var(--fg-rgb),0.06)' }}>
         <p style={{ fontSize: 11, fontWeight: 500, color: 'var(--text-muted)', margin: 0, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
@@ -99,6 +101,7 @@ function PillGroup<T extends string | number>({
 export default function SettingsPage() {
   const router = useRouter();
   const isMobile = useIsMobile();
+  const fi = useFadeIn();
   const [panelOpen, setPanelOpen] = useState(false);
   const [settings, setSettings] = useState<Settings>({ weeklyGoal: 3, weightUnit: 'kg', theme: 'forma', name: '' });
   const [loading, setLoading] = useState(true);
@@ -183,7 +186,7 @@ export default function SettingsPage() {
         <div style={{ maxWidth: 560, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: isMobile ? 20 : 32 }}>
 
           {/* Header */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', ...fi(0) }}>
             <div>
               <h1 style={{ fontSize: 22, fontWeight: 500, color: 'var(--text)', margin: '0 0 4px', letterSpacing: '-0.025em' }}>Settings</h1>
               <p style={{ fontSize: 13, color: 'var(--text-muted)', margin: 0 }}>Preferences are saved automatically.</p>
@@ -204,7 +207,7 @@ export default function SettingsPage() {
           </div>
 
           {/* Appearance */}
-          <Section title="Appearance" compact={isMobile}>
+          <Section title="Appearance" compact={isMobile} style={fi(80)}>
             <Row
               label="Theme"
               desc="Forma is the signature dark green. Light is beige & white."
@@ -222,7 +225,7 @@ export default function SettingsPage() {
           </Section>
 
           {/* Preferences */}
-          <Section title="Preferences" compact={isMobile}>
+          <Section title="Preferences" compact={isMobile} style={fi(160)}>
             <Row
               label="Weight unit"
               desc="Used in your weight tracker and profile."
@@ -248,7 +251,7 @@ export default function SettingsPage() {
           </Section>
 
           {/* Account */}
-          <Section title="Account" compact={isMobile}>
+          <Section title="Account" compact={isMobile} style={fi(240)}>
             <Row label="Profile" desc="View your stats and BMI." compact={isMobile}>
               <button
                 onClick={() => router.push('/profile')}
@@ -278,7 +281,7 @@ export default function SettingsPage() {
           </Section>
 
           {/* Danger zone */}
-          <Section title="Danger zone" compact={isMobile}>
+          <Section title="Danger zone" compact={isMobile} style={fi(320)}>
             <Row label="Log out" desc="You'll be returned to the home screen." compact={isMobile}>
               <button
                 onClick={async () => {

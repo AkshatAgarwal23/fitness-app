@@ -6,6 +6,7 @@ import { Trophy, Star, Flame, Zap, Shield, Dumbbell, TrendingUp, Lock, Sun, Moon
 import Navbar from '../components/Navbar';
 import SidePanel from '../components/SidePanel';
 import { useIsMobile } from '../hooks/useIsMobile';
+import { useFadeIn } from '../hooks/useFadeIn';
 import { getCached, setCached } from '../lib/cache';
 
 interface AchievementData {
@@ -49,15 +50,82 @@ const card: React.CSSProperties = {
   boxShadow: 'inset 0 1px 0 rgba(var(--fg-rgb),0.05)',
 };
 
+function AchievementCard({ a, index }: { a: AchievementData; index: number }) {
+  const [hovered, setHovered] = useState(false);
+  const Icon = ICON_MAP[a.id] ?? Star;
+
+  return (
+    <div
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        ...card,
+        padding: '18px 20px',
+        display: 'flex', alignItems: 'center', gap: 16,
+        opacity: a.unlocked ? 1 : 0.45,
+        animation: 'fadeSlideIn 0.5s ease both',
+        animationDelay: `${Math.min(index * 40, 500)}ms`,
+        background: a.unlocked
+          ? 'linear-gradient(135deg, rgba(var(--accent-rgb),0.06) 0%, var(--card-bg) 60%)'
+          : 'var(--card-bg)',
+        border: a.unlocked
+          ? `1px solid rgba(var(--accent-rgb),${hovered ? 0.35 : 0.18})`
+          : '1px solid var(--card-border)',
+        transform: hovered ? 'translateY(-3px)' : 'translateY(0)',
+        boxShadow: hovered && a.unlocked
+          ? '0 8px 24px rgba(0,0,0,0.2), 0 0 20px rgba(var(--accent-rgb),0.12)'
+          : 'inset 0 1px 0 rgba(var(--fg-rgb),0.05)',
+        transition: 'transform 0.25s cubic-bezier(0.16,1,0.3,1), box-shadow 0.25s ease, border-color 0.25s ease, opacity 0.2s ease',
+      }}
+    >
+      {/* Icon */}
+      <div style={{
+        width: 44, height: 44, borderRadius: 12, flexShrink: 0,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        background: a.unlocked ? 'rgba(var(--accent-rgb),0.15)' : 'rgba(var(--fg-rgb),0.04)',
+        border: `1px solid ${a.unlocked ? 'rgba(var(--accent-rgb),0.25)' : 'rgba(var(--fg-rgb),0.07)'}`,
+        position: 'relative',
+        transform: hovered && a.unlocked ? 'scale(1.08) rotate(-6deg)' : 'scale(1) rotate(0deg)',
+        transition: 'transform 0.3s cubic-bezier(0.34,1.56,0.64,1)',
+      }}>
+        {a.unlocked ? (
+          <Icon size={20} strokeWidth={1.6} color="var(--accent)" />
+        ) : (
+          <Lock size={16} strokeWidth={1.6} color="var(--text-muted)" />
+        )}
+        {a.unlocked && (
+          <div style={{
+            position: 'absolute', top: -3, right: -3,
+            width: 10, height: 10, borderRadius: '50%',
+            background: 'var(--accent)',
+            boxShadow: '0 0 8px rgba(var(--accent-rgb),0.8)',
+            border: '2px solid var(--bg)',
+            animation: hovered ? 'softPulse 1.2s ease-in-out infinite' : 'none',
+          }} />
+        )}
+      </div>
+
+      {/* Text */}
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <p style={{ fontSize: 14, fontWeight: 500, color: a.unlocked ? 'var(--text)' : 'var(--text-secondary)', margin: 0 }}>{a.name}</p>
+        <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: '3px 0 0', lineHeight: 1.4 }}>{a.desc}</p>
+        {a.unlocked && a.unlockedAt && (
+          <p style={{ fontSize: 11, color: 'var(--accent)', margin: '6px 0 0', fontWeight: 500 }}>
+            Unlocked {formatDate(a.unlockedAt)}
+          </p>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function AchievementsPage() {
   const router = useRouter();
   const isMobile = useIsMobile();
   const [panelOpen, setPanelOpen] = useState(false);
   const [achievements, setAchievements] = useState<AchievementData[]>([]);
   const [loading, setLoading] = useState(true);
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => { setTimeout(() => setMounted(true), 40); }, []);
+  const fi = useFadeIn();
 
   useEffect(() => {
     const cached = getCached<AchievementData[]>('achievements');
@@ -75,14 +143,6 @@ export default function AchievementsPage() {
 
   const unlockedCount = achievements.filter(a => a.unlocked).length;
   const total = achievements.length;
-
-  function fi(delay: number): React.CSSProperties {
-    return {
-      opacity: mounted ? 1 : 0,
-      transform: mounted ? 'translateY(0)' : 'translateY(20px)',
-      transition: `opacity 0.55s cubic-bezier(0.16,1,0.3,1) ${delay}ms, transform 0.55s cubic-bezier(0.16,1,0.3,1) ${delay}ms`,
-    };
-  }
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -144,75 +204,14 @@ export default function AchievementsPage() {
             gap: 14,
             ...fi(80),
           }}>
-            {achievements.map((a, i) => {
-              const Icon = ICON_MAP[a.id] ?? Star;
-              return (
-                <div
-                  key={a.id}
-                  style={{
-                    ...card,
-                    padding: '18px 20px',
-                    display: 'flex', alignItems: 'center', gap: 16,
-                    opacity: a.unlocked ? 1 : 0.45,
-                    transition: 'opacity 0.2s ease',
-                    animation: `fadeSlideIn 0.5s ease both`,
-                    animationDelay: `${i * 40}ms`,
-                    background: a.unlocked
-                      ? 'linear-gradient(135deg, rgba(var(--accent-rgb),0.06) 0%, var(--card-bg) 60%)'
-                      : 'var(--card-bg)',
-                    border: a.unlocked
-                      ? '1px solid rgba(var(--accent-rgb),0.18)'
-                      : '1px solid var(--card-border)',
-                  }}
-                >
-                  {/* Icon */}
-                  <div style={{
-                    width: 44, height: 44, borderRadius: 12, flexShrink: 0,
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    background: a.unlocked ? 'rgba(var(--accent-rgb),0.15)' : 'rgba(var(--fg-rgb),0.04)',
-                    border: `1px solid ${a.unlocked ? 'rgba(var(--accent-rgb),0.25)' : 'rgba(var(--fg-rgb),0.07)'}`,
-                    position: 'relative',
-                  }}>
-                    {a.unlocked ? (
-                      <Icon size={20} strokeWidth={1.6} color="var(--accent)" />
-                    ) : (
-                      <Lock size={16} strokeWidth={1.6} color="var(--text-muted)" />
-                    )}
-                    {a.unlocked && (
-                      <div style={{
-                        position: 'absolute', top: -3, right: -3,
-                        width: 10, height: 10, borderRadius: '50%',
-                        background: 'var(--accent)',
-                        boxShadow: '0 0 8px rgba(var(--accent-rgb),0.8)',
-                        border: '2px solid var(--bg)',
-                      }} />
-                    )}
-                  </div>
-
-                  {/* Text */}
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <p style={{ fontSize: 14, fontWeight: 500, color: a.unlocked ? 'var(--text)' : 'var(--text-secondary)', margin: 0 }}>{a.name}</p>
-                    <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: '3px 0 0', lineHeight: 1.4 }}>{a.desc}</p>
-                    {a.unlocked && a.unlockedAt && (
-                      <p style={{ fontSize: 11, color: 'var(--accent)', margin: '6px 0 0', fontWeight: 500 }}>
-                        Unlocked {formatDate(a.unlockedAt)}
-                      </p>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
+            {achievements.map((a, i) => (
+              <AchievementCard key={a.id} a={a} index={i} />
+            ))}
           </div>
 
         </div>
       </main>
 
-      <style>{`
-        @keyframes fadeSlideIn {
-          from { opacity: 0; transform: translateY(14px); }
-          to   { opacity: 1; transform: translateY(0); }
-        }
-      `}</style>
     </div>
   );
 }

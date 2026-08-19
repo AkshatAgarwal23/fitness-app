@@ -173,6 +173,40 @@
   50%       { opacity: 0.7; }
 }
 
+/* List items sliding in from the left, one after another */
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-14px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+/* Generic fade-up used by cards and grids */
+@keyframes fadeSlideIn {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Progress bars filling from zero */
+@keyframes growWidth {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+
+/* Soft breathing pulse for "live" indicators */
+@keyframes softPulse {
+  0%, 100% { opacity: 1;    transform: scale(1);    }
+  50%      { opacity: 0.55; transform: scale(1.15); }
+}
+
+/* Respect users who've asked their OS to reduce motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
 
 * { box-sizing: border-box; }
 
