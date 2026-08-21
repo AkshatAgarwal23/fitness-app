@@ -208,6 +208,31 @@
 }
 
 
+/* Mobile preview simulation — phone frame via transform-based containment */
+body.mobile-preview {
+  overflow: hidden;
+  background: #05060A;
+}
+
+/* The app frame becomes the scroll container and stacking root.
+   transform: translateZ(0) makes ALL position:fixed children inside
+   position relative to this element instead of the viewport. */
+body.mobile-preview #app-frame {
+  max-width: 390px;
+  margin: 0 auto;
+  height: 100vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  transform: translateZ(0);
+  position: relative;
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,0.1),
+    -40px 0 80px rgba(0,0,0,0.6),
+    40px 0 80px rgba(0,0,0,0.6);
+  scrollbar-width: none;
+}
+body.mobile-preview #app-frame::-webkit-scrollbar { display: none; }
+
 * { box-sizing: border-box; }
 
 body {

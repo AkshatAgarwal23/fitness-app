@@ -352,7 +352,7 @@ export default function DashboardPage() {
       <SidePanel isOpen={panelOpen} onClose={() => setPanelOpen(false)} />
       <Toast toasts={toasts} onDismiss={dismissToast} />
 
-      <main style={{ flex: 1, padding: isMobile ? '20px 16px 60px' : '36px 24px 60px' }}>
+      <main style={{ flex: 1, padding: isMobile ? '20px 16px calc(84px + env(safe-area-inset-bottom, 0px))' : '36px 24px 60px' }}>
         <div style={{ maxWidth: 1100, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 24 }}>
 
           {/* Greeting + top-right stats */}

@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import AnimatedBackground from "./components/AnimatedBackground";
 import PageTransition from "./components/PageTransition";
+import BottomNav from "./components/BottomNav";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -25,12 +26,15 @@ export default function RootLayout({
       <body className="min-h-full relative">
         <script
           dangerouslySetInnerHTML={{
-            __html: `try{var t=localStorage.getItem('forma-theme');if(t==='light')document.documentElement.setAttribute('data-theme',t)}catch(e){}`,
+            __html: `try{var t=localStorage.getItem('forma-theme');if(t==='light')document.documentElement.setAttribute('data-theme',t)}catch(e){}try{if(localStorage.getItem('forma-mobile-preview')==='1')document.body.classList.add('mobile-preview')}catch(e){}`,
           }}
         />
-        <AnimatedBackground />
-        <div style={{ position: 'relative', zIndex: 1 }}>
-          <PageTransition>{children}</PageTransition>
+        <div id="app-frame">
+          <AnimatedBackground />
+          <div style={{ position: 'relative', zIndex: 1 }}>
+            <PageTransition>{children}</PageTransition>
+          </div>
+          <BottomNav />
         </div>
       </body>
     </html>

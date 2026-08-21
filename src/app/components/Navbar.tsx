@@ -1,8 +1,10 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { Smartphone, Monitor } from 'lucide-react';
 import Avatar from './Avatar';
+import { useIsMobile } from '../hooks/useIsMobile';
 
 interface NavbarProps {
   userName?: string;
@@ -45,7 +47,50 @@ function MenuButton({ onClick }: { onClick: () => void }) {
   );
 }
 
+function ViewToggle() {
+  const [mobilePreview, setMobilePreview] = useState(false);
+  const [hovered, setHovered] = useState(false);
+
+  useEffect(() => {
+    setMobilePreview(document.body.classList.contains('mobile-preview'));
+  }, []);
+
+  function toggle() {
+    const next = !mobilePreview;
+    setMobilePreview(next);
+    document.body.classList.toggle('mobile-preview', next);
+    try { localStorage.setItem('forma-mobile-preview', next ? '1' : '0'); } catch {}
+  }
+
+  const Icon = mobilePreview ? Monitor : Smartphone;
+  const label = mobilePreview ? 'Desktop' : 'Mobile';
+
+  return (
+    <button
+      onClick={toggle}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      title={`Switch to ${label} view`}
+      style={{
+        display: 'flex', alignItems: 'center', gap: 6,
+        padding: '6px 12px', borderRadius: 8, border: 'none',
+        background: mobilePreview
+          ? 'rgba(var(--accent-rgb), 0.12)'
+          : hovered ? 'rgba(var(--fg-rgb), 0.07)' : 'rgba(var(--fg-rgb), 0.04)',
+        color: mobilePreview ? 'var(--accent)' : 'var(--text-secondary)',
+        fontSize: 12, fontWeight: 500, cursor: 'pointer',
+        transition: 'all 0.18s ease',
+        outline: mobilePreview ? '1px solid rgba(var(--accent-rgb), 0.25)' : '1px solid rgba(var(--fg-rgb), 0.08)',
+      } as React.CSSProperties}
+    >
+      <Icon size={14} strokeWidth={1.8} />
+      {label}
+    </button>
+  );
+}
+
 export default function Navbar({ userName = '', onMenuOpen }: NavbarProps) {
+  const isMobile = useIsMobile();
   return (
     <nav
       style={{
@@ -109,8 +154,9 @@ export default function Navbar({ userName = '', onMenuOpen }: NavbarProps) {
             </Link>
           )}
 
-          {/* Hamburger — only shown on dashboard */}
-          {onMenuOpen && <MenuButton onClick={onMenuOpen} />}
+          {/* View toggle + hamburger — desktop only */}
+          {!isMobile && <ViewToggle />}
+          {!isMobile && onMenuOpen && <MenuButton onClick={onMenuOpen} />}
         </div>
       </div>
     </nav>

@@ -168,7 +168,7 @@ export default function AchievementsPage() {
       <Navbar onMenuOpen={() => setPanelOpen(true)} />
       <SidePanel isOpen={panelOpen} onClose={() => setPanelOpen(false)} />
 
-      <main style={{ flex: 1, padding: isMobile ? '20px 16px 60px' : '36px 24px 60px', position: 'relative', zIndex: 1 }}>
+      <main style={{ flex: 1, padding: isMobile ? '20px 16px calc(84px + env(safe-area-inset-bottom, 0px))' : '36px 24px 60px', position: 'relative', zIndex: 1 }}>
         <div style={{ maxWidth: 900, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 24 }}>
 
           {/* Header */}

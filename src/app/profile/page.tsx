@@ -192,7 +192,7 @@ export default function ProfilePage() {
     <div className="min-h-screen flex flex-col">
     <Navbar userName={user.name} onMenuOpen={() => setPanelOpen(true)} />
       <SidePanel isOpen={panelOpen} onClose={() => setPanelOpen(false)} />
-    <main className="flex-1 flex items-center justify-center px-6 py-12 relative overflow-hidden">
+    <main className="flex-1 flex items-center justify-center px-6 py-12 relative overflow-hidden" style={isMobile ? { paddingBottom: 'calc(84px + env(safe-area-inset-bottom, 0px))' } : {}}>
       <div style={{
         position: 'absolute', top: '50%', left: '50%',
         transform: 'translate(-50%, -50%)',

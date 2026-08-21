@@ -234,7 +234,7 @@ export default function ProgressPage() {
       <Navbar userName={userName} onMenuOpen={() => setPanelOpen(true)} />
       <SidePanel isOpen={panelOpen} onClose={() => setPanelOpen(false)} />
 
-      <main style={{ flex: 1, padding: isMobile ? '24px 16px 60px' : '40px 24px 80px' }}>
+      <main style={{ flex: 1, padding: isMobile ? '24px 16px calc(84px + env(safe-area-inset-bottom, 0px))' : '40px 24px 80px' }}>
         <div style={{ maxWidth: 680, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 32 }}>
 
           {/* Page header */}
