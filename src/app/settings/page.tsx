@@ -5,7 +5,8 @@ import { useRouter } from 'next/navigation';
 import { Check } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import SidePanel from '../components/SidePanel';
-import { useIsMobile } from '../hooks/useIsMobile';
+import ViewToggle from '../components/ViewToggle';
+import { useIsMobile, useIsRealDesktop } from '../hooks/useIsMobile';
 import { useFadeIn } from '../hooks/useFadeIn';
 import { getCached, setCached } from '../lib/cache';
 
@@ -101,8 +102,10 @@ function PillGroup<T extends string | number>({
 export default function SettingsPage() {
   const router = useRouter();
   const isMobile = useIsMobile();
+  const isRealDesktop = useIsRealDesktop();
   const fi = useFadeIn();
   const [panelOpen, setPanelOpen] = useState(false);
+  const [loggingOut, setLoggingOut] = useState(false);
   const [settings, setSettings] = useState<Settings>(() => {
     const cached = getCached<{ name: string; weeklyGoal: number; weightUnit: string; theme: string }>('profile');
     if (!cached) return { weeklyGoal: 3, weightUnit: 'kg', theme: 'forma', name: '' };
@@ -118,6 +121,17 @@ export default function SettingsPage() {
   const [saving, setSaving] = useState(false);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
   const [deleting, setDeleting] = useState(false);
+
+  async function handleLogout() {
+    try { fetch('http://localhost:5000/api/auth/logout', { method: 'POST', credentials: 'include' }); } catch {}
+    if (isMobile) {
+      // Play the gate-closing animation, then leave.
+      setLoggingOut(true);
+      setTimeout(() => router.push('/'), 680);
+    } else {
+      router.push('/');
+    }
+  }
 
   async function handleDeleteAccount() {
     setDeleting(true);
@@ -220,6 +234,20 @@ export default function SettingsPage() {
             </Row>
           </Section>
 
+          {/* Display — only when previewing mobile on a real desktop.
+              This is where the top-bar view toggle moves to in mobile view. */}
+          {isRealDesktop && isMobile && (
+            <Section title="Display" compact={isMobile} style={fi(120)}>
+              <Row
+                label="View mode"
+                desc="Switch back to the full desktop layout."
+                compact={isMobile}
+              >
+                <ViewToggle />
+              </Row>
+            </Section>
+          )}
+
           {/* Preferences */}
           <Section title="Preferences" compact={isMobile} style={fi(160)}>
             <Row
@@ -280,10 +308,7 @@ export default function SettingsPage() {
           <Section title="Danger zone" compact={isMobile} style={fi(320)}>
             <Row label="Log out" desc="You'll be returned to the home screen." compact={isMobile}>
               <button
-                onClick={async () => {
-                  await fetch('http://localhost:5000/api/auth/logout', { method: 'POST', credentials: 'include' });
-                  router.push('/');
-                }}
+                onClick={handleLogout}
                 style={{
                   padding: '7px 16px', borderRadius: 8,
                   background: 'rgba(226,75,74,0.08)',
@@ -347,6 +372,43 @@ export default function SettingsPage() {
 
         </div>
       </main>
+
+      {/* Gate-closing logout animation (mobile only) — two panels slide shut */}
+      {loggingOut && (
+        <div style={{ position: 'fixed', inset: 0, zIndex: 9999 }}>
+          {/* Left door */}
+          <div style={{
+            position: 'absolute', top: 0, bottom: 0, left: 0, width: '50.5%',
+            background: 'linear-gradient(to right, #05060A 60%, #0C0F16 100%)',
+            borderRight: '1px solid rgba(var(--accent-rgb),0.4)',
+            boxShadow: 'inset -18px 0 40px rgba(0,0,0,0.6)',
+            animation: 'gateCloseLeft 0.6s cubic-bezier(0.7,0,0.25,1) forwards',
+          }} />
+          {/* Right door */}
+          <div style={{
+            position: 'absolute', top: 0, bottom: 0, right: 0, width: '50.5%',
+            background: 'linear-gradient(to left, #05060A 60%, #0C0F16 100%)',
+            borderLeft: '1px solid rgba(var(--accent-rgb),0.4)',
+            boxShadow: 'inset 18px 0 40px rgba(0,0,0,0.6)',
+            animation: 'gateCloseRight 0.6s cubic-bezier(0.7,0,0.25,1) forwards',
+          }} />
+          {/* Seam glow + farewell, fades in once the doors meet */}
+          <div style={{
+            position: 'absolute', inset: 0,
+            display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 14,
+            animation: 'gateSeam 0.75s ease forwards',
+          }}>
+            <div style={{
+              width: 2, height: 120,
+              background: 'linear-gradient(to bottom, transparent, var(--accent), transparent)',
+              boxShadow: '0 0 18px 2px rgba(var(--accent-rgb),0.8)',
+            }} />
+            <p style={{ fontSize: 14, color: 'var(--text-secondary)', letterSpacing: '0.02em', margin: 0 }}>
+              See you soon
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -40,20 +40,31 @@ function BmiRing({ bmi }: { bmi: number }) {
     return () => clearTimeout(t);
   }, []);
 
-  const color =
-    bmi < 18.5 ? '#5B9EF5' :
-    bmi < 25   ? 'var(--accent)' :
-    bmi < 30   ? '#F5A623' :
-                 '#E24B4A';
-  const label =
-    bmi < 18.5 ? 'Underweight' :
-    bmi < 25   ? 'Normal'      :
-    bmi < 30   ? 'Overweight'  :
-                 'Obese';
+  // Each tier carries an rgb triple too, so the glow can be built with a real
+  // rgba() — interpolating `var(--accent)` into a hex alpha never renders.
+  const tier =
+    bmi < 18.5 ? { color: '#5B9EF5',       rgb: '91,158,245',      label: 'Underweight' } :
+    bmi < 25   ? { color: 'var(--accent)', rgb: 'var(--accent-rgb)', label: 'Normal'    } :
+    bmi < 30   ? { color: '#F5A623',       rgb: '245,166,35',      label: 'Overweight'  } :
+                 { color: '#E24B4A',       rgb: '226,75,74',       label: 'Obese'       };
+  const { color, label } = tier;
+
+  // The heavier the reading, the brighter the ring burns. The blur is capped so
+  // the light always fades to nothing before it reaches the card's clipped edge.
+  const intensity = Math.min(Math.max((bmi - 15) / 25, 0), 1); // BMI 15 → 0, 40 → 1
+  const glowBlur = 3 + intensity * 13;     // 3px → 16px
+  const glowAlpha = 0.3 + intensity * 0.6; // 0.3 → 0.9
 
   return (
     <div style={{ position: 'relative', width: 100, height: 100, flexShrink: 0 }}>
-      <svg width={100} height={100} viewBox="0 0 100 100">
+      {/* Canvas is oversized (and offset back) so the glow has room to fall off
+          naturally — at exactly 100x100 the blur gets clipped into a square. */}
+      <svg
+        width={180}
+        height={180}
+        viewBox="-40 -40 180 180"
+        style={{ position: 'absolute', top: -40, left: -40, overflow: 'visible', pointerEvents: 'none' }}
+      >
         <circle cx={50} cy={50} r={r} fill="none" stroke="rgba(var(--fg-rgb),0.06)" strokeWidth={6} />
         <circle
           cx={50} cy={50} r={r} fill="none"
@@ -63,8 +74,12 @@ function BmiRing({ bmi }: { bmi: number }) {
           strokeLinecap="round"
           transform="rotate(-90 50 50)"
           style={{
-            transition: 'stroke-dashoffset 1.4s cubic-bezier(0.16,1,0.3,1)',
-            filter: `drop-shadow(0 0 6px ${color}80)`,
+            transition: 'stroke-dashoffset 1.4s cubic-bezier(0.16,1,0.3,1), filter 1.4s ease',
+            // Two stacked shadows: a tight bright core plus a wide soft bloom,
+            // so the light falls off gradually instead of ending on an edge.
+            filter: filled
+              ? `drop-shadow(0 0 ${glowBlur * 0.5}px rgba(${tier.rgb},${glowAlpha})) drop-shadow(0 0 ${glowBlur}px rgba(${tier.rgb},${glowAlpha * 0.5}))`
+              : `drop-shadow(0 0 0px rgba(${tier.rgb},0)) drop-shadow(0 0 0px rgba(${tier.rgb},0))`,
           }}
         />
       </svg>
@@ -212,13 +227,27 @@ export default function ProfilePage() {
       }}>
 
         {/* Profile header */}
-        <div style={{ padding: isMobile ? '24px 20px 20px' : '32px 32px 28px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: isMobile ? 16 : 24 }}>
-          <Avatar name={user.name} size={64} />
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <h2 style={{ fontSize: 20, fontWeight: 500, color: 'var(--text)', margin: '0 0 4px', letterSpacing: '-0.02em' }}>{user.name}</h2>
-            <p style={{ fontSize: 13, color: 'var(--text-muted)', margin: 0 }}>{user.email}</p>
+        <div style={{ padding: isMobile ? '24px 20px 20px' : '32px 32px 28px', borderBottom: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: isMobile ? 14 : 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? 16 : 24 }}>
+            <Avatar name={user.name} size={64} />
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <h2 style={{ fontSize: 20, fontWeight: 500, color: 'var(--text)', margin: 0, letterSpacing: '-0.02em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{user.name}</h2>
+              {/* On desktop the email fits beside the ring; on mobile it moves
+                  to its own full-width line below so it shows in full. */}
+              {!isMobile && (
+                <p style={{ fontSize: 13, color: 'var(--text-muted)', margin: '4px 0 0', overflowWrap: 'anywhere' }}>{user.email}</p>
+              )}
+            </div>
+            {user.bmi ? <BmiRing bmi={user.bmi} /> : null}
           </div>
-          {user.bmi ? <BmiRing bmi={user.bmi} /> : null}
+          {isMobile && user.email && (
+            <p style={{
+              fontSize: 12, color: 'var(--text-muted)', margin: 0,
+              overflowWrap: 'anywhere', lineHeight: 1.45,
+            }}>
+              {user.email}
+            </p>
+          )}
         </div>
 
         {/* Info rows */}

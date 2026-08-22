@@ -208,30 +208,98 @@
 }
 
 
-/* Mobile preview simulation — phone frame via transform-based containment */
-body.mobile-preview {
+/* Mobile preview simulation — phone frame via transform-based containment.
+   The class lives on <html> so the pre-hydration init script can set it
+   consistently (documentElement always exists) without a hydration mismatch. */
+.mobile-preview body {
   overflow: hidden;
   background: #05060A;
 }
 
-/* The app frame becomes the scroll container and stacking root.
-   transform: translateZ(0) makes ALL position:fixed children inside
-   position relative to this element instead of the viewport. */
-body.mobile-preview #app-frame {
+/* The app frame is the stacking root and clipping box, but it does NOT
+   scroll — transform: translateZ(0) makes position:fixed children (the
+   animated background, the bottom nav) resolve against this element. */
+.mobile-preview #app-frame {
   max-width: 390px;
   margin: 0 auto;
   height: 100vh;
-  overflow-y: auto;
-  overflow-x: hidden;
+  overflow: hidden;
   transform: translateZ(0);
   position: relative;
   box-shadow:
     0 0 0 1px rgba(255,255,255,0.1),
     -40px 0 80px rgba(0,0,0,0.6),
     40px 0 80px rgba(0,0,0,0.6);
+}
+
+/* Only the content scrolls — so the bottom nav can stay pinned and content
+   slides behind it. */
+.mobile-preview #app-scroll {
+  height: 100vh;
+  overflow-y: auto;
+  overflow-x: hidden;
   scrollbar-width: none;
 }
-body.mobile-preview #app-frame::-webkit-scrollbar { display: none; }
+.mobile-preview #app-scroll::-webkit-scrollbar { display: none; }
+
+/* ── Mobile type scale ──
+   Page type is sized in fixed px for the desktop layout, which reads chunky
+   in the narrow mobile column. Scaling the content wrapper (not the scroll
+   container, whose 100vh height must stay exact) trims everything in
+   proportion so the design keeps its balance. The bottom nav sits outside
+   this wrapper, so its tap targets stay full size. */
+.mobile-preview #app-scroll > * { zoom: 0.88; }
+
+@media (max-width: 639px) {
+  #app-scroll > * { zoom: 0.88; }
+}
+
+/* On a real mobile device the nav is fixed to the viewport. In desktop
+   preview it becomes absolute so it pins to the frame while content scrolls. */
+.bottom-nav { position: fixed; }
+.mobile-preview .bottom-nav { position: absolute; }
+
+/* Green light cone growing down onto the active tab (A-shape spotlight) */
+@keyframes spotlightIn {
+  from { opacity: 0; transform: translateX(-50%) scaleY(0.5); }
+  to   { opacity: 1; transform: translateX(-50%) scaleY(1); }
+}
+
+/* ── Bottom-nav per-icon signature animations (one per tab) ── */
+/* Home — a little settling hop */
+@keyframes navHome {
+  0%   { transform: translateY(0); }
+  35%  { transform: translateY(-5px); }
+  60%  { transform: translateY(0); }
+  78%  { transform: translateY(-2px); }
+  100% { transform: translateY(0); }
+}
+/* Progress — a clean confirmation tick (dip, pop, settle) */
+@keyframes navProgress {
+  0%   { transform: scale(1); }
+  25%  { transform: scale(0.8); }
+  55%  { transform: scale(1.25); }
+  78%  { transform: scale(0.94); }
+  100% { transform: scale(1); }
+}
+/* Awards — a celebratory trophy wiggle */
+@keyframes navTrophy {
+  0%, 100% { transform: rotate(0deg); }
+  18%  { transform: rotate(-13deg); }
+  42%  { transform: rotate(11deg); }
+  66%  { transform: rotate(-6deg); }
+  86%  { transform: rotate(3deg); }
+}
+/* Settings — the gear turns */
+@keyframes navSettings {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(200deg); }
+}
+
+/* Gate-closing logout animation — two panels slide in to meet in the middle */
+@keyframes gateCloseLeft  { from { transform: translateX(-100%); } to { transform: translateX(0); } }
+@keyframes gateCloseRight { from { transform: translateX(100%);  } to { transform: translateX(0); } }
+@keyframes gateSeam       { 0% { opacity: 0; } 55% { opacity: 0; } 100% { opacity: 1; } }
 
 * { box-sizing: border-box; }
 
